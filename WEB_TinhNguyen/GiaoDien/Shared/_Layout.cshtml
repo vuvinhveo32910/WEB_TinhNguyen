@@ -1,0 +1,761 @@
+@using Microsoft.EntityFrameworkCore
+@using WEB_TinhNguyen.DuLieu
+@using WEB_TinhNguyen.Areas.CuaHang.Models
+@using WEB_TinhNguyen.Areas.CuaHang.Helpers
+@inject ApplicationDbContext _context
+@{
+    var sessionCart = Context.Session.Get<List<CartItem>>("GioHangGayQuy");
+    int cartCount = sessionCart?.Sum(i => i.SoLuong) ?? 0;
+
+    var activeConfig = _context.CauHinhTrangChus
+        .Include(c => c.ChienDich)
+        .Where(c => c.ChienDich.TrangThaiHoatDong == true)
+        .FirstOrDefault();
+
+    string? logoImg = activeConfig?.LinkAnhBia;
+    string? textTop = activeConfig?.TieuDePhu;
+    string? textBot = activeConfig?.TieuDeChinh;
+
+    string bgWeb = "#ffffff";
+    string colorMain = "#15803d";
+    string colorSub = "#22c55e";
+    string colorText = "#143823";
+
+    string fontTitle = activeConfig?.FontTieuDe != null ? activeConfig.FontTieuDe.Replace(" ", "+") : "Be+Vietnam+Pro";
+    string fontBody = activeConfig?.FontNoiDung != null ? activeConfig.FontNoiDung.Replace(" ", "+") : "Be+Vietnam+Pro";
+
+    // Lấy năm hiện tại để gán link cho nút Ký ức
+    int currentYear = activeConfig?.ChienDich?.Nam ?? DateTime.Now.Year;
+}
+
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <meta name="theme-color" content="@colorMain" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a140e" media="(prefers-color-scheme: dark)">
+    <title>@ViewData["Title"] @(!string.IsNullOrEmpty(textBot) ? "- " + textBot : "")</title>
+
+    @if (!string.IsNullOrEmpty(logoImg))
+    {
+        <link rel="shortcut icon" href="@logoImg">
+    }
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <!-- FONT CHỮ VÀ ICON FONT AWESOME -->
+    <link href="https://fonts.googleapis.com/css2?family=@(fontTitle):wght@400;700;900&family=@(fontBody):wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+            tailwind.config = {
+                darkMode: 'class',
+                theme: {
+                    extend: {
+                        colors: {
+                            'night': '#0a140e',
+                            'night-2': '#13241b',
+                            'volunteer': {
+                                '50': '#f0fdf4',
+                                '100': '#dcfce7',
+                                '200': '#bbf7d0',
+                                '300': '#86efac',
+                                '400': '#4ade80',
+                                '500': '#22c55e',
+                                '600': '#16a34a',
+                                '700': '#15803d',
+                                '800': '#166534',
+                                '900': '#14532d',
+                                '950': '#052e16',
+                            },
+                            'volunteer-night': '#0a140e',
+                            'volunteer-card': '#13241b',
+                            'volunteer-text': '#143823',
+                            'volunteer-amber': '#f59e0b',
+                            'volunteer-rose': '#f43f5e',
+                            'leaf-bright': '#81c784',
+                            'grass': '#8bc34a',
+                            'sun': '#ffeb3b',
+                            'sunset': '#ff9800',
+                            'sky-soft': '#e0f7fa',
+                            'cream': '#fffdd0',
+                            'ink': '#263238',
+                            'leaf-deep': 'var(--color-leaf-deep)',
+                            'leaf': 'var(--color-leaf)',
+                            'forest': 'var(--color-forest)',
+                        },
+                        animation: {
+                            'float': 'float 4s ease-in-out infinite',
+                            'pulse-slow': 'pulseSlow 3s ease-in-out infinite',
+                            'heartbeat': 'heartBeat 1.5s ease-in-out infinite',
+                            'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        },
+                        keyframes: {
+                            float: {
+                                '0%, 100%': { transform: 'translateY(0px)' },
+                                '50%': { transform: 'translateY(-8px)' },
+                            },
+                            pulseSlow: {
+                                '0%, 100%': { opacity: '1', transform: 'scale(1)' },
+                                '50%': { opacity: '0.85', transform: 'scale(1.03)' },
+                            },
+                            heartBeat: {
+                                '0%, 100%': { transform: 'scale(1)' },
+                                '14%': { transform: 'scale(1.15)' },
+                                '28%': { transform: 'scale(1)' },
+                                '42%': { transform: 'scale(1.1)' },
+                                '70%': { transform: 'scale(1)' },
+                            },
+                            fadeInUp: {
+                                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                                '100%': { opacity: '1', transform: 'translateY(0)' },
+                            }
+                        }
+                    }
+                }
+            }
+    </script>
+
+    <!-- SCRIPT ƯU TIÊN CHẠY ĐẦU TIÊN ĐỂ FIX LỖI NHÁY GIAO DIỆN (ANTI-FOUC) -->
+    <script>
+        (function () {
+            try {
+                // CÔ LẬP CỬA HÀNG: Nếu đang ở /CuaHang, BẮT BUỘC bỏ Dark mode
+                var pathname = window.location.pathname.toLowerCase();
+                if (pathname.indexOf('/cuahang') !== -1) {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add('light');
+                    return;
+                }
+
+                var savedTheme = localStorage.getItem('site_theme') || localStorage.getItem('theme');
+                if (savedTheme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.classList.remove('light');
+                } else {
+                    // MẶC ĐỊNH LÀ LIGHT MODE VỚI NỀN TRẮNG
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add('light');
+                    localStorage.setItem('site_theme', 'light');
+                }
+            } catch (e) {
+                console.error('Theme initialization error:', e);
+            }
+        })();
+    </script>
+
+    <style>
+            :root {
+                /* Volunteer Identity Palette */
+                --bg-page: #ffffff;
+                --bg-surface: #ffffff;
+                --bg-surface-soft: #f8faf8;
+
+                --text-main: #143823;
+                --text-muted: #3d6049;
+                --text-subtle: #6b8f77;
+
+                --volunteer-primary: #15803d;
+                --volunteer-primary-hover: #166534;
+                --volunteer-accent: #22c55e;
+                --volunteer-light: #dcfce7;
+
+                --volunteer-sun: #f59e0b;
+                --volunteer-heart: #f43f5e;
+                --volunteer-water: #0284c7;
+
+                --border-light: rgba(20, 56, 35, 0.08);
+                --border-card: rgba(22, 163, 74, 0.15);
+                --shadow-card: 0 10px 25px -5px rgba(20, 56, 35, 0.05), 0 8px 10px -6px rgba(20, 56, 35, 0.05);
+                --shadow-elevated: 0 20px 30px -10px rgba(21, 128, 61, 0.15);
+
+                --bg-web: var(--bg-page);
+                --color-main: var(--volunteer-primary);
+                --color-sub: var(--volunteer-accent);
+                --color-text: var(--text-main);
+                --color-leaf-deep: var(--volunteer-primary);
+                --color-leaf: var(--volunteer-accent);
+                --color-forest: var(--text-main);
+                --font-title: '@(activeConfig?.FontTieuDe ?? "Be Vietnam Pro")', sans-serif;
+                --font-body: '@(activeConfig?.FontNoiDung ?? "Be Vietnam Pro")', sans-serif;
+                --crater-color: var(--bg-page);
+            }
+
+            html.dark {
+                --bg-page: #0a140e;
+                --bg-surface: #13241b;
+                --bg-surface-soft: #0d1d14;
+
+                --text-main: #f8fafc;
+                --text-muted: #cbd5e1;
+                --text-subtle: #94a3b8;
+
+                --volunteer-primary: #4ade80;
+                --volunteer-primary-hover: #86efac;
+                --volunteer-accent: #86efac;
+                --volunteer-light: rgba(74, 222, 128, 0.12);
+
+                --volunteer-sun: #fbbf24;
+                --volunteer-heart: #fb7185;
+                --volunteer-water: #38bdf8;
+
+                --border-light: rgba(255, 255, 255, 0.08);
+                --border-card: rgba(74, 222, 128, 0.2);
+                --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+                --shadow-elevated: 0 20px 30px -10px rgba(0, 0, 0, 0.7);
+
+                --bg-web: var(--bg-page);
+                --color-main: var(--volunteer-primary);
+                --color-sub: var(--volunteer-accent);
+                --color-text: var(--text-main);
+                --color-leaf-deep: var(--volunteer-primary);
+                --color-leaf: var(--volunteer-accent);
+                --color-forest: var(--text-main);
+                --crater-color: var(--bg-page);
+            }
+
+            body:not(.cuahang-body) {
+                background-color: var(--bg-page);
+                color: var(--text-main);
+                font-family: var(--font-body);
+            }
+
+            /* MÀU SÁNG & TỐI CƠ BẢN */
+            html:not(.dark) body {
+                background-color: var(--bg-page) !important;
+                color: var(--text-main) !important;
+            }
+
+            html:not(.dark) .logo-font-main {
+                font-family: var(--font-title);
+                color: var(--color-main) !important;
+            }
+
+            html:not(.dark) .logo-font-sub {
+                color: var(--color-sub) !important;
+            }
+
+            html.dark body {
+                background-color: var(--bg-page) !important;
+                color: var(--text-main) !important;
+            }
+
+            html.dark .logo-font-main {
+                font-family: var(--font-title);
+                color: #86efac !important;
+            }
+
+            html.dark .logo-font-sub {
+                color: #bbf7d0 !important;
+            }
+
+            html.dark {
+                --crater-color: var(--bg-page);
+            }
+
+                /* BẢO VỆ MÀU CHỮ CHẾ ĐỘ TỐI */
+                html.dark main p:not(.keep-color):not(.keep-theme *), html.dark main li:not(.keep-color):not(.keep-theme *), html.dark main span:not([class*="bg-"]):not(.keep-color):not(.keep-theme *), html.dark main div:not([class*="bg-white"]):not(.keep-color):not(.keep-theme *), html.dark main .prose *:not(.keep-color):not(.keep-theme *) {
+                    color: #e2e8f0 !important;
+                }
+
+                html.dark main h1:not(.keep-color):not(.keep-theme *), html.dark main h2:not(.keep-color):not(.keep-theme *), html.dark main h3:not(.keep-color):not(.keep-theme *), html.dark main h4:not(.keep-color):not(.keep-theme *) {
+                    color: #ffffff !important;
+                }
+
+                html.dark main [class*="rounded-full"][style*="background"], html.dark main a[style*="background"], html.dark main button[style*="background"], html.dark main .text-white {
+                    color: #ffffff !important;
+                }
+
+                html.dark main section[style*="background"], html.dark main[style*="background"] {
+                    background: linear-gradient(to bottom, #0a1626, #0c1712, #122118) !important;
+                }
+
+                html.dark main .bg-white, html.dark main .bg-white\/85, html.dark main .bg-white\/80, html.dark main .bg-white\/70 {
+                    background-color: var(--bg-surface) !important;
+                    border-color: var(--border-card) !important;
+                }
+
+                html.dark #newsReaderModal > div, html.dark #qrModal > div, html.dark #sponsorModal > div {
+                    background-color: #16261d !important;
+                    border-color: rgba(255, 255, 255, 0.12) !important;
+                    color: #f1f5f9 !important;
+                }
+
+                html.dark #newsReaderModal .sticky {
+                    background-color: #16261d !important;
+                    border-color: rgba(255, 255, 255, 0.1) !important;
+                }
+
+                html.dark #newsReaderModal #modalPostBody, html.dark #newsReaderModal #modalPostBody * {
+                    color: #e2e8f0 !important;
+                }
+
+            /* =====================================================================
+                           HIỆU ỨNG NÚT CHUYỂN ĐỔI SÁNG / TỐI (LIGHT/DARK MODE TOGGLE BUTTON)
+                           ===================================================================== */
+            .theme-toggle-btn {
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            .theme-toggle-btn:hover {
+                transform: rotate(15deg) scale(1.05);
+            }
+
+            html.dark .theme-toggle-btn {
+                box-shadow: 0 0 15px rgba(251, 191, 36, 0.35);
+            }
+
+            /* =====================================================================
+                           CSS BOTTOM NAVIGATION MƯỢT MÀ
+                           ===================================================================== */
+            .navigation {
+                position: fixed;
+                bottom: 15px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 96%;
+                height: 70px;
+                background: #222327;
+                border-radius: 20px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            }
+
+            html.dark .navigation {
+                background: #1a1b1f;
+                border: 1px solid rgba(255,255,255,0.05);
+            }
+
+            .navigation ul {
+                display: flex;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                position: relative;
+            }
+
+                .navigation ul li {
+                    position: relative;
+                    list-style: none;
+                    flex: 1;
+                    height: 100%;
+                    z-index: 2;
+                }
+
+                    .navigation ul li a {
+                        position: relative;
+                        display: block;
+                        width: 100%;
+                        height: 100%;
+                        text-align: center;
+                        -webkit-tap-highlight-color: transparent;
+                    }
+
+                        .navigation ul li a .icon {
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            font-size: 1.4rem;
+                            color: rgba(255, 255, 255, 0.5);
+                            transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                            z-index: 10;
+                        }
+
+                    .navigation ul li.active a .icon {
+                        top: 0px;
+                        color: #222327;
+                        font-size: 1.5rem;
+                    }
+
+            html.dark .navigation ul li.active a .icon {
+                color: #1a1b1f;
+            }
+
+            .navigation ul li a .text {
+                position: absolute;
+                bottom: -20px;
+                left: 50%;
+                transform: translateX(-50%);
+                color: #ffffff;
+                font-weight: 600;
+                font-size: 10px;
+                letter-spacing: 0.05em;
+                transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                opacity: 0;
+                pointer-events: none;
+                white-space: nowrap;
+            }
+
+            .navigation ul li.active a .text {
+                opacity: 1;
+                bottom: 12px;
+            }
+
+            .navigation .indicator {
+                position: absolute;
+                top: -36px;
+                width: 60px;
+                height: 60px;
+                background: #ffffff;
+                border-radius: 50%;
+                border: 6px solid #222327;
+                transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                transform: translateX(-50%);
+                box-sizing: content-box;
+                z-index: 1;
+            }
+
+            html.dark .navigation .indicator {
+                background: #86efac;
+                border-color: #1a1b1f;
+            }
+
+            @@media (max-width: 1023px) {
+                body {
+                    padding-bottom: 100px;
+                }
+            }
+    </style>
+</head>
+
+<body class="text-gray-800 dark:bg-night dark:text-gray-100 transition-colors duration-300 relative">
+
+    <!-- Header -->
+    <header id="main-header" class="fixed inset-x-0 top-0 z-50 transition-all duration-300 bg-white/90 dark:bg-night/90 backdrop-blur-md shadow-sm py-2 border-b border-transparent dark:border-white/10">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-5">
+            <a href="/" class="flex min-w-0 items-center gap-2 sm:gap-2.5">
+                @if (!string.IsNullOrEmpty(logoImg))
+                {
+                    <span class="relative flex h-11 w-11 items-center justify-center overflow-hidden">
+                        <img alt="Logo" width="44" height="44" class="object-contain" src="@logoImg">
+                    </span>
+                }
+                <span class="min-w-0 leading-tight">
+                    @if (!string.IsNullOrEmpty(textTop))
+                    {
+                        <span class="block text-[10px] font-bold uppercase tracking-wider logo-font-sub sm:text-[11px]">@textTop</span>
+                    }
+                    @if (!string.IsNullOrEmpty(textBot))
+                    {
+                        <span class="block truncate text-lg font-black logo-font-main sm:text-2xl pt-0.5">@Html.Raw(textBot.Replace("\n", "<br/>"))</span>
+                    }
+                </span>
+            </a>
+
+            <!-- Menu Desktop -->
+            <nav class="hidden md:flex items-center gap-1 lg:flex">
+                <a class="rounded-full px-3.5 py-2 text-sm font-medium text-gray-700 transition hover:bg-leaf/10 hover:text-leaf-deep dark:text-gray-100 dark:hover:bg-white/10 dark:hover:text-leaf-bright" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                <a class="rounded-full px-3.5 py-2 text-sm font-medium transition @(ViewContext.RouteData.Values["Area"]?.ToString() == "CuaHang" ? "bg-leaf/15 text-leaf-deep font-semibold dark:bg-white/15 dark:text-leaf-bright" : "text-gray-700 hover:bg-leaf/10 hover:text-leaf-deep dark:text-gray-100 dark:hover:bg-white/10 dark:hover:text-leaf-bright")" asp-area="CuaHang" asp-controller="CuaHang" asp-action="Index">Cửa hàng Gây quỹ</a>
+                <a asp-area="CuaHang" asp-controller="GioHang" asp-action="Index"
+                   class="relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-white/10 dark:text-emerald-300 dark:hover:bg-white/15 transition shadow-xs"
+                   title="Xem giỏ quà gây quỹ">
+                    <i class="fas fa-shopping-basket text-emerald-600 dark:text-emerald-400"></i>
+                    <span class="hidden xl:inline">Giỏ quà</span>
+                    <span id="cartCountBadge" class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-black text-white bg-rose-500 rounded-full">
+                        @cartCount
+                    </span>
+                </a>
+                <a class="rounded-full px-3.5 py-2 text-sm font-medium text-gray-700 transition hover:bg-leaf/10 hover:text-leaf-deep dark:text-gray-100 dark:hover:bg-white/10 dark:hover:text-leaf-bright" asp-area="" asp-controller="Home" asp-action="ChuongTrinh">Chương trình</a>
+                <a class="rounded-full px-3.5 py-2 text-sm font-medium text-gray-700 transition hover:bg-leaf/10 hover:text-leaf-deep dark:text-gray-100 dark:hover:bg-white/10 dark:hover:text-leaf-bright" asp-area="" asp-controller="Home" asp-action="GayQuy">Đóng góp</a>
+                <a class="rounded-full px-3.5 py-2 text-sm font-medium text-gray-700 transition hover:bg-leaf/10 hover:text-leaf-deep dark:text-gray-100 dark:hover:bg-white/10 dark:hover:text-leaf-bright" asp-area="" asp-controller="Home" asp-action="BanToChuc">Ban tổ chức</a>
+                <a class="rounded-full px-3.5 py-2 text-sm font-medium text-gray-700 transition hover:bg-leaf/10 hover:text-leaf-deep dark:text-gray-100 dark:hover:bg-white/10 dark:hover:text-leaf-bright" asp-area="" asp-controller="Home" asp-action="TinTuc">Tin tức</a>
+
+                <div class="relative group">
+                    <button type="button" class="flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-medium text-gray-700 dark:text-gray-100 transition hover:bg-leaf/15 hover:text-leaf-deep dark:hover:bg-white/10 dark:hover:text-leaf-bright">
+                        Ký ức <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+                    </button>
+                    <div class="absolute right-0 top-full mt-1 w-36 rounded-xl bg-white dark:bg-night-2 p-1.5 shadow-lg ring-1 ring-black/5 dark:ring-white/10 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-50">
+                        @{
+                            var cacNam = _context.ChienDichs.Select(c => c.Nam).Distinct().OrderBy(n => n).ToList();
+                            foreach (var nam in cacNam)
+                            {
+                                <a href="@Url.Action("KyUc", "Home", new { year = nam })" class="block rounded-lg px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 transition hover:bg-leaf/15 hover:text-leaf-deep dark:hover:bg-white/10 dark:hover:text-leaf-bright">Mùa @nam</a>
+                            }
+                        }
+                    </div>
+                </div>
+
+                @if (ViewContext.RouteData.Values["area"]?.ToString() != "CuaHang")
+                {
+                    <!-- NÚT CHUYỂN ĐỔI SÁNG / TỐI (LIGHT/DARK MODE TOGGLE DESKTOP) -->
+                    <button id="themeToggleBtn" type="button" onclick="toggleThemeMode()"
+                            class="theme-toggle-btn ml-1.5 relative inline-flex items-center justify-center w-10 h-10 rounded-full border border-emerald-500/20 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:bg-white/10 dark:text-amber-400 dark:hover:bg-white/15 dark:border-white/10 transition-all duration-300 shadow-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            title="Chuyển đổi giao diện Sáng / Tối"
+                            aria-label="Chuyển đổi giao diện Sáng / Tối">
+                        <!-- Icon Mặt Trăng (Hiển thị khi đang ở chế độ SÁNG -> mời bật TỐI) -->
+                        <i class="fas fa-moon text-sm text-emerald-700 transition-transform duration-300 rotate-0 dark:-rotate-90 dark:hidden"></i>
+                        <!-- Icon Mặt Trời (Hiển thị khi đang ở chế độ TỐI -> mời bật SÁNG) -->
+                        <i class="fas fa-sun text-sm text-amber-400 transition-transform duration-300 hidden dark:inline-block rotate-0"></i>
+                    </button>
+                }
+            </nav>
+
+            <!-- NÚT CHUYỂN ĐỔI SÁNG / TỐI (LIGHT/DARK MODE TOGGLE MOBILE) -->
+            @if (ViewContext.RouteData.Values["area"]?.ToString() != "CuaHang")
+            {
+                <div class="flex items-center gap-2 md:hidden">
+                    <button id="themeToggleBtnMobile" type="button" onclick="toggleThemeMode()"
+                            class="theme-toggle-btn relative inline-flex items-center justify-center w-9 h-9 rounded-full border border-emerald-500/20 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:bg-white/10 dark:text-amber-400 dark:hover:bg-white/15 dark:border-white/10 transition-all duration-300 shadow-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            title="Chuyển đổi giao diện Sáng / Tối"
+                            aria-label="Chuyển đổi giao diện Sáng / Tối">
+                        <i class="fas fa-moon text-sm text-emerald-700 transition-transform duration-300 rotate-0 dark:-rotate-90 dark:hidden"></i>
+                        <i class="fas fa-sun text-sm text-amber-400 transition-transform duration-300 hidden dark:inline-block rotate-0"></i>
+                    </button>
+                </div>
+            }
+        </div>
+    </header>
+
+    <main class="min-h-screen pt-[60px] md:pt-[72px]">
+        @RenderBody()
+    </main>
+
+    <!-- FOOTER MÀU XANH -->
+    <footer class="relative mt-24 bg-[#143220] dark:bg-[#0b1b11] text-white transition-colors duration-300">
+        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none transform -translate-y-full">
+            <svg viewBox="0 0 1440 100" preserveAspectRatio="none" class="block w-full h-[60px] md:h-[90px]">
+                <path d="M0,32L60,42.7C120,53,240,75,360,74.7C480,75,600,53,720,48C840,43,960,53,1080,58.7C1200,64,1320,64,1380,64L1440,64L1440,100L1380,100C1320,100,1200,100,1080,100C960,100,840,100,720,100C600,100,480,100,360,100C240,100,120,100,60,100L0,100Z" class="fill-[#1e4b30] dark:fill-[#122b1c] transition-colors duration-300"></path>
+                <path d="M0,64L60,58.7C120,53,240,43,360,48C480,53,600,75,720,80C840,85,960,75,1080,64C1200,53,1320,43,1380,37.3L1440,32L1440,100L1380,100C1320,100,1200,100,1080,100C960,100,840,100,720,100C600,100,480,100,360,100C240,100,120,100,60,100L0,100Z" class="fill-[#143220] dark:fill-[#0b1b11] transition-colors duration-300"></path>
+            </svg>
+        </div>
+
+        @if (activeConfig != null && activeConfig.HienThiMascot == true && !string.IsNullOrEmpty(activeConfig.LinkAnhMascot))
+        {
+            string posClass = "right-6 sm:right-20";
+            if (activeConfig.ViTriMascot == "left") posClass = "left-6 sm:left-20";
+            if (activeConfig.ViTriMascot == "center") posClass = "left-1/2 -translate-x-1/2";
+            <div class="pointer-events-none select-none absolute -top-[100px] sm:-top-[130px] @posClass z-10 transition-transform duration-300 hover:scale-105 animate-float" title="Linh vật dự án">
+                <img alt="Linh vật" loading="lazy" class="h-auto w-28 sm:w-36 object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.3)]" src="@activeConfig.LinkAnhMascot">
+            </div>
+        }
+
+        <div class="mx-auto max-w-7xl px-6 pb-8 pt-10 md:pt-14 relative z-10">
+            <div class="grid gap-12 md:grid-cols-12">
+                <div class="md:col-span-5 lg:col-span-4">
+                    <a href="/" class="inline-flex items-center gap-3 mb-6 bg-white/5 hover:bg-white/10 py-2.5 px-3.5 rounded-2xl border border-white/10 backdrop-blur-sm transition shadow-sm">
+                        @if (!string.IsNullOrEmpty(logoImg))
+                        {
+                            <div class="bg-white p-1.5 rounded-xl shadow-inner shrink-0">
+                                <img alt="Logo Footer" loading="lazy" class="h-10 w-10 sm:h-11 sm:w-11 object-contain" src="@logoImg">
+                            </div>
+                        }
+                        <div class="leading-tight">
+                            @if (!string.IsNullOrEmpty(textTop))
+                            {
+                                <span class="block text-[10px] font-extrabold uppercase tracking-widest text-emerald-400 mb-0.5">@textTop</span>
+                            }
+                            @if (!string.IsNullOrEmpty(textBot))
+                            {
+                                <span class="block font-black text-white text-lg sm:text-xl leading-none" style="font-family: var(--font-title);">@Html.Raw(textBot.Replace("\n", " "))</span>
+                            }
+                        </div>
+                    </a>
+                    <p class="text-white/70 text-sm leading-relaxed mb-6 font-medium pr-4">
+                        Dự án tình nguyện mang mùa xuân ấm áp đến các em nhỏ. Hành trình kết nối những trái tim yêu thương.
+                    </p>
+                    <div class="flex items-center gap-3">
+                        <a href="https://www.facebook.com/profile.php?id=61580211752903" target="_blank" class="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition text-white/80 border border-white/20 shadow-sm"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-red-600 hover:border-red-600 hover:text-white transition text-white/80 border border-white/20 shadow-sm"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white transition text-white/80 border border-white/20 shadow-sm"><i class="fas fa-envelope"></i></a>
+                    </div>
+                </div>
+                <div class="md:col-span-3 lg:col-span-4 md:pl-8">
+                    <h3 class="text-sm font-extrabold uppercase tracking-widest text-emerald-400 mb-6">Khám phá</h3>
+                    <ul class="space-y-4 text-white/80 font-medium text-sm hidden md:block">
+                        <li><a href="/CuaHang" class="group flex items-center gap-2.5 hover:text-white transition"><i class="fas fa-chevron-right text-[10px] text-emerald-500 group-hover:translate-x-1 transition-transform"></i> Cửa hàng gây quỹ</a></li>
+                        <li><a href="/Home/ChuongTrinh" class="group flex items-center gap-2.5 hover:text-white transition"><i class="fas fa-chevron-right text-[10px] text-emerald-500 group-hover:translate-x-1 transition-transform"></i> Chương trình</a></li>
+                        <li><a href="/Home/BanToChuc" class="group flex items-center gap-2.5 hover:text-white transition"><i class="fas fa-chevron-right text-[10px] text-emerald-500 group-hover:translate-x-1 transition-transform"></i> Ban tổ chức</a></li>
+                        <li><a href="/Home/TinTuc" class="group flex items-center gap-2.5 hover:text-white transition"><i class="fas fa-chevron-right text-[10px] text-emerald-500 group-hover:translate-x-1 transition-transform"></i> Tin tức dự án</a></li>
+                        <li><a href="/Home/GayQuy" class="group flex items-center gap-2.5 hover:text-white transition"><i class="fas fa-chevron-right text-[10px] text-emerald-500 group-hover:translate-x-1 transition-transform"></i> Đóng góp & Tài trợ</a></li>
+                    </ul>
+                </div>
+                <div class="md:col-span-4 lg:col-span-4">
+                    <h3 class="text-sm font-extrabold uppercase tracking-widest text-emerald-400 mb-6">Liên hệ</h3>
+                    <ul class="space-y-4 text-white/80 text-sm font-medium">
+                        <li class="flex items-start gap-3"><i class="fas fa-map-marker-alt mt-1 text-emerald-500 text-lg w-5 text-center"></i><span class="leading-relaxed">Viện Công nghệ Việt - Hàn (VKIT), HUTECH</span></li>
+                        <li class="flex items-center gap-3"><i class="fas fa-envelope text-emerald-500 text-lg w-5 text-center"></i><a href="mailto:vkit.hutech@gmail.com" class="hover:text-white transition">vkit.hutech@gmail.com</a></li>
+                        <li class="flex items-center gap-3"><i class="fas fa-phone-alt text-emerald-500 text-lg w-5 text-center"></i><a href="tel:0123456789" class="hover:text-white transition">0123 456 789</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-12 pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
+                <p class="text-xs text-white/50 font-medium text-center md:text-left">&copy; @DateTime.Now.Year - Trăng Sáng Langbiang.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- THANH LIQUID BOTTOM NAVIGATION MOBILE -->
+    <div class="navigation fixed bottom-[15px] md:hidden lg:hidden">
+        <ul>
+            <li class="list" data-url="/home/index">
+                <a href="/">
+                    <span class="icon"><i class="fas fa-home"></i></span>
+                    <span class="text">Trang chủ</span>
+                </a>
+            </li>
+            <li class="list" data-url="/cuahang">
+                <a asp-area="CuaHang" asp-controller="CuaHang" asp-action="Index">
+                    <span class="icon"><i class="fas fa-store"></i></span>
+                    <span class="text">Cửa hàng</span>
+                </a>
+            </li>
+            <li class="list" data-url="/home/chuongtrinh">
+                <a href="/Home/ChuongTrinh">
+                    <span class="icon"><i class="fas fa-calendar-alt"></i></span>
+                    <span class="text">Sự kiện</span>
+                </a>
+            </li>
+            <li class="list" data-url="/home/kyuc">
+                <a href="/Home/KyUc?year=@currentYear">
+                    <span class="icon"><i class="fas fa-history"></i></span>
+                    <span class="text">Ký ức</span>
+                </a>
+            </li>
+            <li class="list" data-url="/home/gayquy">
+                <a href="/Home/GayQuy">
+                    <span class="icon"><i class="fas fa-heart"></i></span>
+                    <span class="text">Đóng góp</span>
+                </a>
+            </li>
+            <li class="list" data-url="/home/bantochuc">
+                <a href="/Home/BanToChuc">
+                    <span class="icon"><i class="fas fa-users"></i></span>
+                    <span class="text">Tổ chức</span>
+                </a>
+            </li>
+            <li class="list" data-url="/home/tintuc">
+                <a href="/Home/TinTuc">
+                    <span class="icon"><i class="fas fa-newspaper"></i></span>
+                    <span class="text">Tin tức</span>
+                </a>
+            </li>
+            <div class="indicator"></div>
+        </ul>
+    </div>
+
+    <!-- FLOATING ACTION CART BUTTON (RESPONSIVE) -->
+    <div id="floatingCartBtn" class="fixed right-5 bottom-24 md:bottom-8 z-40">
+        <a asp-area="CuaHang" asp-controller="GioHang" asp-action="Index"
+           class="flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-emerald-600 to-green-700 text-white shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all group border border-white/20"
+           title="Xem giỏ quà gây quỹ">
+            <i class="fas fa-shopping-basket text-lg animate-bounce group-hover:scale-110 transition-transform"></i>
+            <span class="font-bold text-xs hidden sm:inline tracking-tight">Giỏ quà gây quỹ</span>
+            <span id="floatingCartCount" class="w-6 h-6 rounded-full bg-rose-500 text-white font-black text-xs flex items-center justify-center shadow-xs">
+                @cartCount
+            </span>
+        </a>
+    </div>
+
+    <!-- CODE GỌI HIỆU ỨNG TỪ DATABASE -->
+    @{
+        int? currentEffectId = activeConfig?.IDHieuUng;
+        if (currentEffectId != null)
+        {
+            var effect = _context.ThuVienHieuUngs.Find(currentEffectId);
+            if (effect != null && !string.IsNullOrEmpty(effect.LinkFileJS) && effect.TrangThai == true)
+            {
+                <script src="@effect.LinkFileJS"></script>
+            }
+        }
+    }
+
+    <!-- JAVASCRIPT ĐIỀU KHIỂN CHUYỂN ĐỔI THEME VÀ NAVIGATION -->
+    <script>
+        function toggleThemeMode() {
+            // Ngăn chặn tuyệt đối nếu vô tình gọi trên trang Cửa Hàng
+            if (window.location.pathname.toLowerCase().indexOf('/cuahang') !== -1) {
+                return;
+            }
+
+            var isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.classList.add('light');
+                localStorage.setItem('site_theme', 'light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.remove('light');
+                localStorage.setItem('site_theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+
+            // Đồng bộ màu inline nếu có phần tử cũ
+            syncInlineColorsForTheme(!isDark);
+
+            // Phát sự kiện để các component khác (biểu đồ, Swiper) có thể re-render
+            window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: !isDark } }));
+        }
+
+        // Tương thích ngược với bất kỳ lệnh gọi toggleTheme nào
+        window.toggleTheme = toggleThemeMode;
+        window.toggleThemeMode = toggleThemeMode;
+
+        function syncInlineColorsForTheme(isDark) {
+            const elements = document.querySelectorAll('main [style*="color"]');
+            elements.forEach(el => {
+                if (el.closest('.keep-theme') || el.style.backgroundColor || el.style.background || el.classList.contains('keep-color')) { return; }
+                if (!el.dataset.origColor && el.style.color) { el.dataset.origColor = el.style.color; }
+                if (isDark) {
+                    const tag = el.tagName.toLowerCase();
+                    if (tag === 'h1' || tag === 'h2' || tag === 'h3' || tag === 'h4') el.style.setProperty('color', '#86efac', 'important');
+                    else el.style.setProperty('color', '#f1f5f9', 'important');
+                } else {
+                    if (el.dataset.origColor) el.style.color = el.dataset.origColor;
+                    else el.style.removeProperty('color');
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            /* 1. XỬ LÝ THANH LIQUID BOTTOM NAV TRÊN MOBILE */
+            const listItems = document.querySelectorAll('.navigation .list');
+            const indicator = document.querySelector('.navigation .indicator');
+
+            function setActiveBottomNav() {
+                let currentPath = window.location.pathname.toLowerCase();
+                if (currentPath === '/' || currentPath === '') currentPath = '/home/index';
+
+                let itemWidth = 100 / listItems.length;
+
+                listItems.forEach((item, index) => {
+                    item.classList.remove('active');
+                    let itemPath = item.getAttribute('data-url');
+
+                    // So sánh đường dẫn
+                    if (currentPath.includes(itemPath) || (itemPath === '/home/index' && currentPath === '/')) {
+                        item.classList.add('active');
+                        let centerPosition = (index * itemWidth) + (itemWidth / 2);
+                        if (indicator) {
+                            indicator.style.left = `calc(${centerPosition}%)`;
+                        }
+                    }
+                });
+            }
+            if (listItems.length > 0 && indicator) {
+                setActiveBottomNav();
+            }
+
+            /* 2. ĐỒNG BỘ THEME BAN ĐẦU */
+            try {
+                if (window.location.pathname.toLowerCase().indexOf('/cuahang') !== -1) {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add('light');
+                } else {
+                    const isInitialDark = document.documentElement.classList.contains('dark');
+                    syncInlineColorsForTheme(isInitialDark);
+                }
+            } catch (e) { }
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

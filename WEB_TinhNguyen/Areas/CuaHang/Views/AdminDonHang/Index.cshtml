@@ -1,0 +1,556 @@
+@model IEnumerable<WEB_TinhNguyen.Areas.CuaHang.Models.DonHangGayQuy>
+@{
+    ViewData["Title"] = "Quản lý Đơn hàng Gây Quỹ";
+    Layout = "~/GiaoDien/Shared/_AdminLayout.cshtml";
+
+    var tongDonHang = ViewBag.TongDonHang != null ? (int)ViewBag.TongDonHang : (Model?.Count() ?? 0);
+    var choXacNhan = ViewBag.ChoXacNhan != null ? (int)ViewBag.ChoXacNhan : 0;
+    var tongDoanhThu = ViewBag.TongDoanhThu != null ? ((decimal)ViewBag.TongDoanhThu) : 0m;
+    var tongTienQuy = ViewBag.TongTienQuy != null ? ((decimal)ViewBag.TongTienQuy) : 0m;
+
+    var currentSearch = ViewBag.CurrentSearch as string ?? "";
+    var currentTrangThai = ViewBag.CurrentTrangThai as string ?? "all";
+    var currentThanhToan = ViewBag.CurrentThanhToan as string ?? "all";
+    var currentSort = ViewBag.CurrentSort as string ?? "";
+}
+
+<div class="max-w-7xl mx-auto my-6 px-4 sm:px-6 lg:px-8 space-y-6">
+
+    <!-- BREADCRUMB & HEADER -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <nav class="flex items-center gap-2 text-xs text-gray-500 mb-2 font-medium">
+                <a href="@Url.Action("Index", "Admin", new { area = "" })" class="hover:text-emerald-600 transition flex items-center gap-1">
+                    <i class="fas fa-home"></i> Quản trị
+                </a>
+                <span>/</span>
+                <span class="text-emerald-700 font-semibold">Cửa Hàng Gây Quỹ</span>
+                <span>/</span>
+                <span class="text-gray-700">Quản lý đơn hàng</span>
+            </nav>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
+                <i class="fas fa-receipt text-emerald-600"></i>
+                <span>Quản lý Đơn hàng Gây Quỹ</span>
+                <span class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    Chiến dịch 2026
+                </span>
+            </h1>
+            <p class="mt-1 text-sm text-gray-500">
+                Theo dõi quy trình đặt mua ấn phẩm thiện nguyện, xác nhận chuyển khoản VietQR và tiến độ bàn giao quà gây quỹ.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3 flex-wrap">
+            <a href="/CuaHang/AdminSanPham"
+               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 shadow-sm transition">
+                <i class="fas fa-boxes text-emerald-600"></i>
+                <span>Kho sản phẩm</span>
+            </a>
+            <a href="/CuaHang" target="_blank"
+               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 shadow-sm transition">
+                <i class="fas fa-external-link-alt"></i>
+                <span>Xem Cửa hàng</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- FLASH ALERTS -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="flex items-center justify-between p-4 text-sm text-emerald-800 border border-emerald-200 rounded-2xl bg-emerald-50 shadow-sm transition">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div>
+                    <span class="font-bold">Thành công!</span> @TempData["SuccessMessage"]
+                </div>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-600 hover:text-emerald-800 text-sm font-bold p-1">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="flex items-center justify-between p-4 text-sm text-red-800 border border-red-200 rounded-2xl bg-red-50 shadow-sm transition">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-red-500 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div>
+                    <span class="font-bold">Có lỗi xảy ra:</span> @TempData["ErrorMessage"]
+                </div>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-red-600 hover:text-red-800 text-sm font-bold p-1">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    }
+
+    <!-- 4 KPI STATS CARDS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Card 1: Tổng đơn hàng -->
+        <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm flex items-center gap-4 hover:shadow-md transition">
+            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl shrink-0">
+                <i class="fas fa-shopping-basket"></i>
+            </div>
+            <div>
+                <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Tổng đơn hàng</div>
+                <div class="text-2xl font-black text-gray-900 mt-0.5">@tongDonHang</div>
+            </div>
+        </div>
+
+        <!-- Card 2: Đơn chờ xác nhận -->
+        <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm flex items-center gap-4 hover:shadow-md transition">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shrink-0">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div>
+                <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Đơn chờ xác nhận</div>
+                <div class="text-2xl font-black text-amber-600 mt-0.5">@choXacNhan</div>
+            </div>
+        </div>
+
+        <!-- Card 3: Doanh thu hàng -->
+        <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm flex items-center gap-4 hover:shadow-md transition">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+                <i class="fas fa-coins"></i>
+            </div>
+            <div>
+                <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Doanh thu gây quỹ</div>
+                <div class="text-2xl font-black text-emerald-700 mt-0.5">@tongDoanhThu.ToString("N0")₫</div>
+            </div>
+        </div>
+
+        <!-- Card 4: Quỹ tình nguyện đóng góp -->
+        <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm flex items-center gap-4 hover:shadow-md transition">
+            <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl shrink-0">
+                <i class="fas fa-hand-holding-heart"></i>
+            </div>
+            <div>
+                <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Trích Quỹ Thiện Nguyện</div>
+                <div class="text-2xl font-black text-rose-600 mt-0.5">@tongTienQuy.ToString("N0")₫</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTER & SEARCH TOOLBAR -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 space-y-4">
+        <form method="get" asp-area="CuaHang" asp-controller="AdminDonHang" asp-action="Index" id="orderFilterForm" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                <!-- Search input -->
+                <div class="md:col-span-5 relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" name="q" value="@currentSearch"
+                           placeholder="Tìm kiếm theo mã đơn, họ tên, số điện thoại, email..."
+                           class="w-full pl-10 pr-10 py-2 text-sm rounded-xl border border-gray-200 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition" />
+                    @if (!string.IsNullOrEmpty(currentSearch))
+                    {
+                        <a href="@Url.Action("Index", "AdminDonHang", new { area = "CuaHang", trangThai = currentTrangThai, thanhToan = currentThanhToan, sort = currentSort })"
+                           class="absolute inset-y-0 right-2 pr-2 flex items-center text-xs text-gray-400 hover:text-gray-600" title="Xóa tìm kiếm">
+                            <i class="fas fa-times-circle"></i>
+                        </a>
+                    }
+                </div>
+
+                <!-- Status filter -->
+                <div class="md:col-span-3">
+                    <select name="trangThai" onchange="document.getElementById('orderFilterForm').submit();"
+                            class="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                        <option value="all" selected="@(currentTrangThai == "all")">Tất cả trạng thái đơn</option>
+                        <option value="MoiDat" selected="@(currentTrangThai == "MoiDat")">⏳ Mới đặt (Chờ xác nhận)</option>
+                        <option value="DaXacNhan" selected="@(currentTrangThai == "DaXacNhan")">✔️ Đã xác nhận</option>
+                        <option value="DangGiao" selected="@(currentTrangThai == "DangGiao")">🚚 Đang giao hàng</option>
+                        <option value="HoanThanh" selected="@(currentTrangThai == "HoanThanh")">🎉 Hoàn thành</option>
+                        <option value="DaHuy" selected="@(currentTrangThai == "DaHuy")">❌ Đã hủy</option>
+                    </select>
+                </div>
+
+                <!-- Payment status filter -->
+                <div class="md:col-span-2">
+                    <select name="thanhToan" onchange="document.getElementById('orderFilterForm').submit();"
+                            class="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                        <option value="all" selected="@(currentThanhToan == "all")">Tất cả thanh toán</option>
+                        <option value="ChuaThanhToan" selected="@(currentThanhToan == "ChuaThanhToan")">Chưa thanh toán</option>
+                        <option value="DaThanhToan" selected="@(currentThanhToan == "DaThanhToan")">Đã thanh toán</option>
+                    </select>
+                </div>
+
+                <!-- Sort select -->
+                <div class="md:col-span-2">
+                    <select name="sort" onchange="document.getElementById('orderFilterForm').submit();"
+                            class="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                        <option value="" selected="@(string.IsNullOrEmpty(currentSort))">Mới nhất trước</option>
+                        <option value="date_asc" selected="@(currentSort == "date_asc")">Cũ nhất trước</option>
+                        <option value="total_desc" selected="@(currentSort == "total_desc")">Tổng tiền cao nhất</option>
+                        <option value="total_asc" selected="@(currentSort == "total_asc")">Tổng tiền thấp nhất</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Quick Status Filter Pills -->
+            <div class="flex items-center gap-2 pt-2 overflow-x-auto pb-1 scrollbar-none border-t border-gray-100">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0 mr-1">
+                    <i class="fas fa-filter mr-1"></i>Lọc nhanh:
+                </span>
+                <a href="@Url.Action("Index", "AdminDonHang", new { area = "CuaHang", q = currentSearch, trangThai = "all", thanhToan = currentThanhToan, sort = currentSort })"
+                   class="px-3 py-1 rounded-full text-xs font-bold transition shrink-0 @(currentTrangThai == "all" ? "bg-emerald-600 text-white shadow-xs" : "bg-gray-100 text-gray-700 hover:bg-gray-200")">
+                    Tất cả (@tongDonHang)
+                </a>
+                <a href="@Url.Action("Index", "AdminDonHang", new { area = "CuaHang", q = currentSearch, trangThai = "MoiDat", thanhToan = currentThanhToan, sort = currentSort })"
+                   class="px-3 py-1 rounded-full text-xs font-bold transition shrink-0 @(currentTrangThai == "MoiDat" ? "bg-amber-500 text-white shadow-xs" : "bg-amber-50 text-amber-800 hover:bg-amber-100")">
+                    Chờ xác nhận (@choXacNhan)
+                </a>
+                <a href="@Url.Action("Index", "AdminDonHang", new { area = "CuaHang", q = currentSearch, trangThai = "DaXacNhan", thanhToan = currentThanhToan, sort = currentSort })"
+                   class="px-3 py-1 rounded-full text-xs font-bold transition shrink-0 @(currentTrangThai == "DaXacNhan" ? "bg-blue-600 text-white shadow-xs" : "bg-blue-50 text-blue-800 hover:bg-blue-100")">
+                    Đã xác nhận
+                </a>
+                <a href="@Url.Action("Index", "AdminDonHang", new { area = "CuaHang", q = currentSearch, trangThai = "DangGiao", thanhToan = currentThanhToan, sort = currentSort })"
+                   class="px-3 py-1 rounded-full text-xs font-bold transition shrink-0 @(currentTrangThai == "DangGiao" ? "bg-purple-600 text-white shadow-xs" : "bg-purple-50 text-purple-800 hover:bg-purple-100")">
+                    Đang giao hàng
+                </a>
+                <a href="@Url.Action("Index", "AdminDonHang", new { area = "CuaHang", q = currentSearch, trangThai = "HoanThanh", thanhToan = currentThanhToan, sort = currentSort })"
+                   class="px-3 py-1 rounded-full text-xs font-bold transition shrink-0 @(currentTrangThai == "HoanThanh" ? "bg-emerald-600 text-white shadow-xs" : "bg-emerald-50 text-emerald-800 hover:bg-emerald-100")">
+                    Hoàn thành
+                </a>
+                <a href="@Url.Action("Index", "AdminDonHang", new { area = "CuaHang", q = currentSearch, trangThai = "DaHuy", thanhToan = currentThanhToan, sort = currentSort })"
+                   class="px-3 py-1 rounded-full text-xs font-bold transition shrink-0 @(currentTrangThai == "DaHuy" ? "bg-red-600 text-white shadow-xs" : "bg-red-50 text-red-800 hover:bg-red-100")">
+                    Đã hủy
+                </a>
+
+                @if (!string.IsNullOrEmpty(currentSearch) || currentTrangThai != "all" || currentThanhToan != "all" || !string.IsNullOrEmpty(currentSort))
+                {
+                    <a href="/CuaHang/AdminDonHang" class="ml-auto text-xs font-semibold text-rose-600 hover:text-rose-800 shrink-0">
+                        <i class="fas fa-undo mr-1"></i>Đặt lại bộ lọc
+                    </a>
+                }
+            </div>
+        </form>
+    </div>
+
+    <!-- ORDERS TABLE -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        @if (Model != null && Model.Any())
+        {
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 text-left text-sm" id="orderTable">
+                    <thead class="bg-gray-50 text-gray-500 uppercase text-[11px] font-bold tracking-wider">
+                        <tr>
+                            <th scope="col" class="py-3.5 px-4">Mã đơn &amp; Ngày đặt</th>
+                            <th scope="col" class="py-3.5 px-4">Người ủng hộ / Đặt mua</th>
+                            <th scope="col" class="py-3.5 px-4">Thanh toán</th>
+                            <th scope="col" class="py-3.5 px-4">Tổng tiền &amp; Quỹ</th>
+                            <th scope="col" class="py-3.5 px-4">Trạng thái đơn</th>
+                            <th scope="col" class="py-3.5 px-4">Trạng thái TT</th>
+                            <th scope="col" class="py-3.5 px-4 text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 bg-white">
+                        @foreach (var order in Model)
+                        {
+                            var totalDonation = order.TienUngHoThem + (order.ChiTietDonHangs?.Sum(c => c.TienDongGop) ?? 0m);
+                            <tr class="hover:bg-gray-50/80 transition-colors">
+                                <!-- Mã đơn -->
+                                <td class="py-4 px-4 whitespace-nowrap">
+                                    <div class="flex items-center gap-2">
+                                        <a asp-area="CuaHang" asp-controller="AdminDonHang" asp-action="ChiTiet" asp-route-id="@order.IDDonHang"
+                                           class="font-mono font-bold text-emerald-700 hover:text-emerald-900 transition">
+                                            @order.MaDonHang
+                                        </a>
+                                        <button type="button" onclick="navigator.clipboard.writeText('@order.MaDonHang'); if(window.Swal) Swal.fire({toast:true, position:'top-end', icon:'success', title:'Đã sao chép mã đơn', showConfirmButton:false, timer:1500});"
+                                                class="text-gray-400 hover:text-gray-600 text-xs p-1" title="Sao chép mã đơn">
+                                            <i class="far fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="text-xs text-gray-400 mt-0.5">
+                                        <i class="far fa-clock mr-1"></i>@order.NgayDatHang.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+                                </td>
+
+                                <!-- Người đặt -->
+                                <td class="py-4 px-4">
+                                    <div class="font-bold text-gray-900">@order.HoTenNguoiMua</div>
+                                    <div class="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
+                                        <span><i class="fas fa-phone-alt text-[10px] text-gray-400 mr-1"></i>@order.SoDienThoai</span>
+                                        @if (!string.IsNullOrEmpty(order.Email))
+                                        {
+                                            <span>•</span>
+                                            <span class="truncate max-w-[150px]" title="@order.Email">@order.Email</span>
+                                        }
+                                    </div>
+                                </td>
+
+                                <!-- Phương thức thanh toán -->
+                                <td class="py-4 px-4 whitespace-nowrap">
+                                    @if (order.PhuongThucThanhToan == "ChuyenKhoanQR" || order.PhuongThucThanhToan == "ChuyenKhoan")
+                                    {
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            <i class="fas fa-qrcode text-emerald-600"></i>
+                                            <span>VietQR</span>
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                            <i class="fas fa-truck text-slate-500"></i>
+                                            <span>COD Tiền mặt</span>
+                                        </span>
+                                    }
+                                </td>
+
+                                <!-- Tổng tiền & Quỹ -->
+                                <td class="py-4 px-4 whitespace-nowrap">
+                                    <div class="font-black text-gray-900">
+                                        @order.TongThanhToan.ToString("N0") VNĐ
+                                    </div>
+                                    <div class="text-xs font-semibold text-rose-600 mt-0.5 flex items-center gap-1">
+                                        <i class="fas fa-heart text-[10px]"></i>
+                                        <span>Quỹ: @totalDonation.ToString("N0")₫</span>
+                                        @if (order.TienUngHoThem > 0)
+                                        {
+                                            <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-1 rounded" title="Ủng hộ thêm">
+                                                +@order.TienUngHoThem.ToString("N0")₫
+                                            </span>
+                                        }
+                                    </div>
+                                </td>
+
+                                <!-- Trạng thái đơn -->
+                                <td class="py-4 px-4 whitespace-nowrap">
+                                    @switch (order.TrangThaiDonHang)
+                                    {
+                                        case "MoiDat":
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                                <i class="fas fa-clock text-amber-600"></i> Mới đặt
+                                            </span>
+                                            break;
+                                        case "DaXacNhan":
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                                                <i class="fas fa-check-circle text-blue-600"></i> Đã xác nhận
+                                            </span>
+                                            break;
+                                        case "DangGiao":
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                                                <i class="fas fa-shipping-fast text-purple-600"></i> Đang giao
+                                            </span>
+                                            break;
+                                        case "HoanThanh":
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                                <i class="fas fa-check-double text-emerald-600"></i> Hoàn thành
+                                            </span>
+                                            break;
+                                        case "DaHuy":
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200">
+                                                <i class="fas fa-times-circle text-red-600"></i> Đã hủy
+                                            </span>
+                                            break;
+                                        default:
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800 border border-gray-200">
+                                                @order.TrangThaiDonHang
+                                            </span>
+                                            break;
+                                    }
+                                </td>
+
+                                <!-- Trạng thái TT -->
+                                <td class="py-4 px-4 whitespace-nowrap">
+                                    @if (order.TrangThaiThanhToan == "DaThanhToan")
+                                    {
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                                            <i class="fas fa-check text-[10px]"></i> Đã TT
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                                            <i class="fas fa-hourglass-half text-[10px]"></i> Chưa TT
+                                        </span>
+                                    }
+                                </td>
+
+                                <!-- Thao tác -->
+                                <td class="py-4 px-4 whitespace-nowrap text-center">
+                                    <div class="inline-flex items-center gap-1.5">
+                                        <!-- Xem chi tiết -->
+                                        <a asp-area="CuaHang" asp-controller="AdminDonHang" asp-action="ChiTiet" asp-route-id="@order.IDDonHang"
+                                           class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white rounded-lg transition"
+                                           title="Xem chi tiết đơn hàng">
+                                            <i class="fas fa-eye"></i>
+                                            <span>Xem</span>
+                                        </a>
+
+                                        <!-- Quick Status Modal Trigger -->
+                                        <button type="button" onclick="openQuickStatusModal(@order.IDDonHang, '@order.MaDonHang', '@order.TrangThaiDonHang', '@order.TrangThaiThanhToan')"
+                                                class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-600 hover:text-white rounded-lg transition"
+                                                title="Đổi nhanh trạng thái">
+                                            <i class="fas fa-sync-alt"></i>
+                                            <span>Đổi TT</span>
+                                        </button>
+
+                                        <!-- Xóa đơn hàng -->
+                                        <button type="button" onclick="openDeleteOrderModal(@order.IDDonHang, '@order.MaDonHang')"
+                                                class="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-600 hover:text-white rounded-lg transition"
+                                                title="Xóa đơn hàng">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <!-- Empty State -->
+            <div class="text-center py-16 px-4 space-y-4">
+                <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center text-2xl">
+                    <i class="fas fa-inbox"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900">Không tìm thấy đơn hàng nào</h3>
+                <p class="text-sm text-gray-500 max-w-md mx-auto">
+                    Không có đơn hàng gây quỹ nào phù hợp với điều kiện tìm kiếm hoặc bộ lọc hiện tại.
+                </p>
+                <div class="pt-2">
+                    <a href="/CuaHang/AdminDonHang"
+                       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition">
+                        <i class="fas fa-undo text-xs"></i>
+                        <span>Đặt lại bộ lọc tìm kiếm</span>
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+<!-- MODAL QUICK STATUS UPDATE -->
+<div id="quickStatusModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity" onclick="closeQuickStatusModal()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+
+        <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border border-gray-100">
+            <form asp-area="CuaHang" asp-controller="AdminDonHang" asp-action="CapNhatTrangThai" method="post" id="quickStatusForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="quickOrderId" />
+
+                <div class="p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-gray-900">
+                                Cập nhật đơn <span id="quickOrderCode" class="text-emerald-700 font-mono"></span>
+                            </h3>
+                        </div>
+                        <button type="button" onclick="closeQuickStatusModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-3 text-sm">
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">Trạng thái quy trình đơn hàng:</label>
+                            <select name="trangThaiDonHang" id="quickOrderStatus" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:ring-2 focus:ring-emerald-500">
+                                <option value="MoiDat">⏳ Mới đặt (Chờ xác nhận)</option>
+                                <option value="DaXacNhan">✔️ Đã xác nhận</option>
+                                <option value="DangGiao">🚚 Đang giao hàng</option>
+                                <option value="HoanThanh">🎉 Hoàn thành</option>
+                                <option value="DaHuy">❌ Đã hủy (Tự động hoàn trả tồn kho)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">Trạng thái thanh toán:</label>
+                            <select name="trangThaiThanhToan" id="quickPaymentStatus" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:ring-2 focus:ring-emerald-500">
+                                <option value="ChuaThanhToan">Chưa thanh toán</option>
+                                <option value="DaThanhToan">Đã thanh toán</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-100">
+                    <button type="button" onclick="closeQuickStatusModal()" class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50">
+                        Đóng
+                    </button>
+                    <button type="submit" class="px-5 py-2 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition">
+                        Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DELETE ORDER CONFIRMATION -->
+<div id="deleteOrderModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity" onclick="closeDeleteOrderModal()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+
+        <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border border-gray-100">
+            <form asp-area="CuaHang" asp-controller="AdminDonHang" asp-action="XoaDonHang" method="post" id="deleteOrderForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="deleteOrderId" />
+
+                <div class="p-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-xl shrink-0">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">Xác nhận xóa đơn hàng?</h3>
+                            <p class="text-sm text-gray-500 mt-0.5">
+                                Bạn có chắc chắn muốn xóa đơn <span id="deleteOrderCode" class="font-mono font-bold text-red-600"></span>? Hành động này không thể hoàn tác.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-100">
+                    <button type="button" onclick="closeDeleteOrderModal()" class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50">
+                        Hủy bỏ
+                    </button>
+                    <button type="submit" class="px-5 py-2 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-sm transition">
+                        Xác nhận xóa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openQuickStatusModal(id, code, orderStatus, payStatus) {
+            document.getElementById('quickOrderId').value = id;
+            document.getElementById('quickOrderCode').textContent = '#' + code;
+            document.getElementById('quickOrderStatus').value = orderStatus;
+            document.getElementById('quickPaymentStatus').value = payStatus;
+            document.getElementById('quickStatusModal').classList.remove('hidden');
+        }
+
+        function closeQuickStatusModal() {
+            document.getElementById('quickStatusModal').classList.add('hidden');
+        }
+
+        function openDeleteOrderModal(id, code) {
+            document.getElementById('deleteOrderId').value = id;
+            document.getElementById('deleteOrderCode').textContent = '#' + code;
+            document.getElementById('deleteOrderModal').classList.remove('hidden');
+        }
+
+        function closeDeleteOrderModal() {
+            document.getElementById('deleteOrderModal').classList.add('hidden');
+        }
+    </script>
+}

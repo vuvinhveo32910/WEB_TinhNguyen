@@ -1,0 +1,486 @@
+@model WEB_TinhNguyen.MoHinh.CauHinhBanToChucVM
+@{
+    ViewData["Title"] = "Cấu hình Ban Tổ Chức - " + Model.TenChienDich;
+    Layout = "~/GiaoDien/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-7xl mx-auto my-8 px-4 sm:px-6 lg:px-8">
+    <!-- HEADER -->
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-5">
+        <div>
+            <div class="flex items-center gap-2 text-sm text-gray-500 mb-1">
+                <a href="@Url.Action("Index", "AdminBanToChuc")" class="hover:text-emerald-600 font-medium">← Quay lại danh sách</a>
+                <span>/</span>
+                <span>Mùa @Model.NamChienDich</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900">
+                Cấu hình Ban Tổ Chức - <span class="text-emerald-600">@Model.TenChienDich</span>
+            </h2>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="@Url.Action("BanToChuc", "Home", new { year = Model.NamChienDich })" target="_blank"
+               class="inline-flex items-center px-4 py-2.5 border border-gray-300 text-sm font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition">
+                👁️ Xem thử trang thật
+            </a>
+            <button type="submit" form="btcForm"
+                    class="inline-flex items-center px-6 py-2.5 text-sm font-bold rounded-xl text-white bg-emerald-600 hover:bg-emerald-700 shadow-md transition">
+                💾 Lưu Toàn Bộ Cấu Hình
+            </button>
+        </div>
+    </div>
+
+    <form asp-action="Edit" method="post" enctype="multipart/form-data" id="btcForm">
+        <input type="hidden" asp-for="IDCauHinhBTC" />
+        <input type="hidden" asp-for="IDChienDich" />
+        <input type="hidden" asp-for="TenChienDich" />
+        <input type="hidden" asp-for="NamChienDich" />
+
+        <!-- TABS NAVIGATION -->
+        <div class="bg-white rounded-t-2xl border-x border-t border-gray-200 px-3 pt-3">
+            <div class="flex space-x-2 overflow-x-auto pb-2">
+                <button type="button" class="tab-btn active shrink-0 px-4 py-2.5 text-sm font-bold rounded-xl text-emerald-700 bg-emerald-50 transition" data-target="tabTree">
+                    🌳 1. Sơ Đồ Cây Ban Thường Trực (Mẫu Mới)
+                </button>
+                <button type="button" class="tab-btn shrink-0 px-4 py-2.5 text-sm font-bold rounded-xl text-gray-500 hover:bg-gray-50 transition" data-target="tabFounders">
+                    ⭐ 2. Ban Sáng Lập
+                </button>
+                <button type="button" class="tab-btn shrink-0 px-4 py-2.5 text-sm font-bold rounded-xl text-gray-500 hover:bg-gray-50 transition" data-target="tabMembers">
+                    👥 3. Danh Sách Thành Viên BTC
+                </button>
+                <button type="button" class="tab-btn shrink-0 px-4 py-2.5 text-sm font-bold rounded-xl text-gray-500 hover:bg-gray-50 transition" data-target="tabStyle">
+                    🎨 4. Màu Sắc, Font Chữ & CTA
+                </button>
+            </div>
+        </div>
+
+        <!-- CONTENT AREA -->
+        <div class="bg-gray-50 rounded-b-2xl border border-gray-200 p-6 sm:p-8 shadow-sm">
+
+            <!-- ========================================================== -->
+            <!-- TAB 1: SƠ ĐỒ CÂY BAN THƯỜNG TRỰC (GIỐNG ẢNH MẪU MTTQ)      -->
+            <!-- ========================================================== -->
+            <div id="tabTree" class="tab-content block space-y-6">
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">Cấu hình Sơ Đồ Tổ Chức Phân Cấp (Tree Diagram)</h3>
+                            <p class="text-xs text-gray-500">Hiển thị sơ đồ nhánh từ Khối Đứng Đầu (Cấp 1) nối xuống các Khối Thường Trực (Cấp 2) giống hệt ảnh mẫu.</p>
+                        </div>
+                        <label class="inline-flex items-center gap-2 cursor-pointer bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-200">
+                            <input type="checkbox" asp-for="HienThiSoDoToChuc" class="w-5 h-5 accent-emerald-600 rounded" />
+                            <span class="text-sm font-bold text-emerald-800">Hiển thị Sơ đồ này</span>
+                        </label>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Nhãn phụ (Badge)</label>
+                            <input type="text" asp-for="SoDo_Nhan" class="w-full border rounded-lg p-2 text-sm" />
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Tiêu đề Khu vực Sơ đồ</label>
+                            <input type="text" asp-for="SoDo_TieuDe" class="w-full border rounded-lg p-2 text-sm font-bold" />
+                        </div>
+                        <div class="md:col-span-3">
+                            <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Đoạn văn giới thiệu mở đầu phía trên Sơ đồ</label>
+                            <textarea asp-for="SoDo_DoanVanMoTa" rows="3" class="w-full border rounded-xl p-3 text-sm"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800">Danh sách Nhân sự trong Sơ Đồ Cây</h3>
+                        <p class="text-xs text-gray-500">Chọn <strong>"Cấp 1 - Khối Đứng Đầu"</strong> cho người ở đỉnh sơ đồ, và <strong>"Cấp 2 - Nhánh Cấp Dưới"</strong> cho các thẻ hàng ngang bên dưới.</p>
+                    </div>
+                    <button type="button" onclick="addRepeaterItem('repeaterTree', 'templateTree')"
+                            class="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-2 rounded-xl shadow-sm transition">
+                        + Thêm Ô Vào Sơ Đồ Cây
+                    </button>
+                </div>
+
+                <div id="repeaterTree" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    @for (int i = 0; i < Model.SoDoThuongTrucs.Count; i++)
+                    {
+                        <div class="bg-white border-2 border-rose-100 rounded-2xl p-5 shadow-sm relative r-item space-y-4">
+                            <button type="button" class="absolute top-3 right-3 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-2.5 py-1 rounded-lg text-xs font-bold transition btn-remove">✕ Xóa</button>
+                            <input type="hidden" asp-for="SoDoThuongTrucs[i].LinkAnhCu" />
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-bold text-rose-700 uppercase mb-1">Vị trí trong Sơ đồ</label>
+                                    <select asp-for="SoDoThuongTrucs[i].NhomHienThi" class="w-full border rounded-lg p-2 text-sm font-bold bg-rose-50 text-rose-900">
+                                        <option value="Tree_Root">👑 Cấp 1 - Khối Đứng Đầu (Ở trên cùng)</option>
+                                        <option value="Tree_Branch">🌿 Cấp 2 - Nhánh Cấp Dưới (Hàng ngang dưới)</option>
+                                    </select>
+                                </div>
+
+                                <div class="sm:col-span-2 flex items-center gap-4 bg-gray-50 p-3 rounded-xl border">
+                                    @if (!string.IsNullOrEmpty(Model.SoDoThuongTrucs[i].LinkAnhCu))
+                                    {
+                                        <img src="@Model.SoDoThuongTrucs[i].LinkAnhCu" class="h-16 w-16 rounded-full object-cover border-2 border-white shadow" />
+                                    }
+                                    <div class="flex-1">
+                                        <label class="block text-xs font-bold text-gray-600 mb-1">Ảnh đại diện / Huy hiệu tròn</label>
+                                        <input type="file" name="SoDoThuongTrucs[@i].FileAnh" accept="image/*" class="w-full text-xs border bg-white p-1.5 rounded file-upload" />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1">Họ và Tên (Trong khung bo tròn)</label>
+                                    <input asp-for="SoDoThuongTrucs[i].HoTen" class="w-full border rounded-lg p-2 text-sm font-bold" placeholder="VD: BÀ PHAN THỊ NHƯ LINH" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1">Link Facebook (Tuỳ chọn)</label>
+                                    <input asp-for="SoDoThuongTrucs[i].LinkFacebook" class="w-full border rounded-lg p-2 text-sm text-blue-600" placeholder="https://facebook.com/..." />
+                                </div>
+
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-bold text-gray-600 mb-1">Các dòng chức vụ ở giữa (Ngăn cách bằng dấu | để tạo nhiều dòng có icon 👤)</label>
+                                    <input asp-for="SoDoThuongTrucs[i].ChucVuPhu" class="w-full border rounded-lg p-2 text-sm" placeholder="VD: Đảng ủy viên | Phó Chủ tịch Thường trực..." />
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1">Chức danh IN ĐẬM ở đáy thẻ</label>
+                                    <input asp-for="SoDoThuongTrucs[i].ChucVuChinh" class="w-full border rounded-lg p-2 text-sm font-extrabold uppercase" placeholder="VD: CHỦ TỊCH / BÍ THƯ / TRƯỞNG BTC" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1">Đơn vị (Dòng nhỏ dưới chức danh đáy)</label>
+                                    <input asp-for="SoDoThuongTrucs[i].DonViCongTac" class="w-full border rounded-lg p-2 text-sm" placeholder="VD: Đoàn TNCS Hồ Chí Minh phường" />
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- ========================================================== -->
+            <!-- TAB 2: BAN SÁNG LẬP                                        -->
+            <!-- ========================================================== -->
+            <div id="tabFounders" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <h3 class="text-lg font-bold text-gray-900">Tiêu đề Khu vực "Ban Sáng Lập"</h3>
+                        <label class="inline-flex items-center gap-2 cursor-pointer bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-200">
+                            <input type="checkbox" asp-for="HienThiBanSangLap" class="w-5 h-5 accent-emerald-600 rounded" />
+                            <span class="text-sm font-bold text-emerald-800">Hiển thị Khu vực này</span>
+                        </label>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Nhãn phụ</label>
+                            <input type="text" asp-for="SangLap_Nhan" class="w-full border rounded-lg p-2" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Tiêu đề chính</label>
+                            <input type="text" asp-for="SangLap_TieuDe" class="w-full border rounded-lg p-2 font-bold" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Cỡ chữ (VD: 54px)</label>
+                            <input type="text" asp-for="SangLap_CoChuTieuDe" class="w-full border rounded-lg p-2" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-gray-800">Danh sách Thành viên Ban Sáng Lập</h3>
+                    <button type="button" onclick="addRepeaterItem('repeaterFounders', 'templateFounder')"
+                            class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-xl shadow-sm transition">
+                        + Thêm Sáng Lập Viên
+                    </button>
+                </div>
+
+                <div id="repeaterFounders" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    @for (int i = 0; i < Model.BanSangLaps.Count; i++)
+                    {
+                        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm relative r-item space-y-3">
+                            <button type="button" class="absolute top-3 right-3 text-red-500 hover:bg-red-50 px-2.5 py-1 rounded-lg text-xs font-bold btn-remove">✕ Xóa</button>
+                            <input type="hidden" asp-for="BanSangLaps[i].LinkAnhCu" />
+
+                            <div class="flex items-center gap-4">
+                                @if (!string.IsNullOrEmpty(Model.BanSangLaps[i].LinkAnhCu))
+                                {
+                                    <img src="@Model.BanSangLaps[i].LinkAnhCu" class="h-20 w-16 object-cover rounded-xl border shadow-sm" />
+                                }
+                                <div class="flex-1 space-y-2">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-600">Kiểu hiển thị</label>
+                                        <select asp-for="BanSangLaps[i].NhomHienThi" class="w-full border rounded-lg p-1.5 text-sm font-semibold bg-emerald-50">
+                                            <option value="Founder_Top">🌟 Người đứng đầu (Ảnh To ở chính giữa trên cùng)</option>
+                                            <option value="Founder">👤 Thành viên sáng lập (Xếp so le trái/phải bên dưới)</option>
+                                        </select>
+                                    </div>
+                                    <input type="file" name="BanSangLaps[@i].FileAnh" accept="image/*" class="w-full text-xs border p-1 rounded bg-gray-50 file-upload" />
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600">Họ và Tên</label>
+                                    <input asp-for="BanSangLaps[i].HoTen" class="w-full border rounded-lg p-2 text-sm font-bold" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600">Vai trò / Chức vụ</label>
+                                    <input asp-for="BanSangLaps[i].ChucVuChinh" class="w-full border rounded-lg p-2 text-sm text-emerald-700 font-semibold" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600">Link Facebook</label>
+                                    <input asp-for="BanSangLaps[i].LinkFacebook" class="w-full border rounded-lg p-2 text-sm text-blue-600" />
+                                </div>
+                                <div class="flex items-center pt-5">
+                                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" asp-for="BanSangLaps[i].CoHuyHieuSao" class="w-4 h-4 accent-amber-500" />
+                                        <span class="text-xs font-bold text-amber-600">⭐ Gắn huy hiệu Ngôi Sao góc trái ảnh</span>
+                                    </label>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-semibold text-gray-600">Đoạn văn giới thiệu</label>
+                                    <textarea asp-for="BanSangLaps[i].MoTaChiTiet" rows="3" class="w-full border rounded-lg p-2 text-sm"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- ========================================================== -->
+            <!-- TAB 3: DANH SÁCH THÀNH VIÊN BTC (CARD NGANG)               -->
+            <!-- ========================================================== -->
+            <div id="tabMembers" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <h3 class="text-lg font-bold text-gray-900">Cấu hình Khu vực "Thành viên Ban Tổ Chức"</h3>
+                        <label class="inline-flex items-center gap-2 cursor-pointer bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-200">
+                            <input type="checkbox" asp-for="HienThiDanhSachBTC" class="w-5 h-5 accent-emerald-600 rounded" />
+                            <span class="text-sm font-bold text-emerald-800">Hiển thị Khu vực này</span>
+                        </label>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Nhãn phụ</label>
+                            <input type="text" asp-for="BTC_Nhan" class="w-full border rounded-lg p-2" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Tiêu đề chính</label>
+                            <input type="text" asp-for="BTC_TieuDe" class="w-full border rounded-lg p-2 font-bold" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Số thành viên hiện trước khi bấm "Xem thêm"</label>
+                            <input type="number" asp-for="SoLuongHienThiBanDau" class="w-full border rounded-lg p-2 font-bold" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-gray-800">Danh sách Thành viên BTC (@Model.ThanhVienBTCs.Count người)</h3>
+                    <button type="button" onclick="addRepeaterItem('repeaterMembers', 'templateMember')"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl shadow-sm transition">
+                        + Thêm Thành Viên BTC
+                    </button>
+                </div>
+
+                <div id="repeaterMembers" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @for (int i = 0; i < Model.ThanhVienBTCs.Count; i++)
+                    {
+                        <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm relative r-item space-y-3">
+                            <button type="button" class="absolute top-2 right-2 text-red-500 hover:bg-red-50 px-2 py-0.5 rounded text-xs font-bold btn-remove">✕</button>
+                            <input type="hidden" asp-for="ThanhVienBTCs[i].NhomHienThi" value="Member" />
+                            <input type="hidden" asp-for="ThanhVienBTCs[i].LinkAnhCu" />
+
+                            <div class="flex items-center gap-3">
+                                @if (!string.IsNullOrEmpty(Model.ThanhVienBTCs[i].LinkAnhCu))
+                                {
+                                    <img src="@Model.ThanhVienBTCs[i].LinkAnhCu" class="h-12 w-12 rounded-full object-cover border" />
+                                }
+                                <div class="flex-1">
+                                    <label class="block text-[11px] font-bold text-gray-500">Ảnh đại diện</label>
+                                    <input type="file" name="ThanhVienBTCs[@i].FileAnh" accept="image/*" class="w-full text-xs border p-1 rounded file-upload" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600">Họ và Tên</label>
+                                <input asp-for="ThanhVienBTCs[i].HoTen" class="w-full border rounded-lg p-1.5 text-sm font-bold" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600">Chức vụ / Ban chuyên môn</label>
+                                <input asp-for="ThanhVienBTCs[i].ChucVuChinh" class="w-full border rounded-lg p-1.5 text-sm" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600">Link Facebook</label>
+                                <input asp-for="ThanhVienBTCs[i].LinkFacebook" class="w-full border rounded-lg p-1.5 text-xs text-blue-600" />
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- ========================================================== -->
+            <!-- TAB 4: GIAO DIỆN CHUNG, FONT CHỮ & CTA CUỐI TRANG          -->
+            <!-- ========================================================== -->
+            <div id="tabStyle" class="tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
+                        <h3 class="text-lg font-bold text-gray-900 border-b pb-2">Font chữ & Màu nền toàn trang</h3>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Font Tiêu đề Nghệ thuật (Google Fonts)</label>
+                            <input type="text" asp-for="FontTieuDe" class="w-full border rounded-xl p-2.5" placeholder="VD: Dancing Script hoặc Be Vietnam Pro" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Font Nội dung (Body)</label>
+                            <input type="text" asp-for="FontNoiDung" class="w-full border rounded-xl p-2.5" placeholder="VD: Be Vietnam Pro" />
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
+                        <h3 class="text-lg font-bold text-gray-900 border-b pb-2">Khu vực Kêu gọi Đăng ký TNV (Cuối trang)</h3>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Câu hỏi kêu gọi</label>
+                            <input type="text" asp-for="CTA_MoTa" class="w-full border rounded-xl p-2.5" />
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Chữ trên Nút</label>
+                                <input type="text" asp-for="CTA_TextNut" class="w-full border rounded-xl p-2.5 font-bold" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Link chuyển hướng</label>
+                                <input type="text" asp-for="CTA_LinkNut" class="w-full border rounded-xl p-2.5" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+<!-- ========================================== -->
+<!-- TEMPLATES ẨN ĐỂ THÊM MỚI BẰNG JAVASCRIPT   -->
+<!-- ========================================== -->
+<div id="templateTree" class="hidden">
+    <div class="bg-white border-2 border-rose-100 rounded-2xl p-5 shadow-sm relative r-item space-y-4">
+        <button type="button" class="absolute top-3 right-3 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-2.5 py-1 rounded-lg text-xs font-bold transition btn-remove">✕ Xóa</button>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-rose-700 uppercase mb-1">Vị trí trong Sơ đồ</label>
+                <select name="SoDoThuongTrucs[INDEX].NhomHienThi" class="w-full border rounded-lg p-2 text-sm font-bold bg-rose-50 text-rose-900">
+                    <option value="Tree_Branch">🌿 Cấp 2 - Nhánh Cấp Dưới (Hàng ngang dưới)</option>
+                    <option value="Tree_Root">👑 Cấp 1 - Khối Đứng Đầu (Ở trên cùng)</option>
+                </select>
+            </div>
+            <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-gray-600 mb-1">Ảnh đại diện / Huy hiệu tròn</label>
+                <input type="file" name="SoDoThuongTrucs[INDEX].FileAnh" accept="image/*" class="w-full text-xs border bg-white p-1.5 rounded file-upload" />
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">Họ và Tên</label>
+                <input name="SoDoThuongTrucs[INDEX].HoTen" class="w-full border rounded-lg p-2 text-sm font-bold" placeholder="VD: ÔNG NGUYỄN VĂN A" />
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">Link Facebook</label>
+                <input name="SoDoThuongTrucs[INDEX].LinkFacebook" class="w-full border rounded-lg p-2 text-sm" />
+            </div>
+            <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-gray-600 mb-1">Các dòng chức vụ ở giữa (Ngăn cách bằng dấu |)</label>
+                <input name="SoDoThuongTrucs[INDEX].ChucVuPhu" class="w-full border rounded-lg p-2 text-sm" placeholder="VD: Đảng ủy viên | Phó Trưởng ban..." />
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">Chức danh IN ĐẬM ở đáy thẻ</label>
+                <input name="SoDoThuongTrucs[INDEX].ChucVuChinh" class="w-full border rounded-lg p-2 text-sm font-extrabold uppercase" placeholder="VD: ĐỒNG TRƯỞNG BAN" />
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">Đơn vị công tác</label>
+                <input name="SoDoThuongTrucs[INDEX].DonViCongTac" class="w-full border rounded-lg p-2 text-sm" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="templateFounder" class="hidden">
+    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm relative r-item space-y-3">
+        <button type="button" class="absolute top-3 right-3 text-red-500 hover:bg-red-50 px-2.5 py-1 rounded-lg text-xs font-bold btn-remove">✕ Xóa</button>
+        <div class="space-y-2">
+            <label class="block text-xs font-bold text-gray-600">Kiểu hiển thị</label>
+            <select name="BanSangLaps[INDEX].NhomHienThi" class="w-full border rounded-lg p-1.5 text-sm font-semibold bg-emerald-50">
+                <option value="Founder">👤 Thành viên sáng lập (Xếp so le trái/phải)</option>
+                <option value="Founder_Top">🌟 Người đứng đầu (Ảnh To ở chính giữa trên cùng)</option>
+            </select>
+            <input type="file" name="BanSangLaps[INDEX].FileAnh" accept="image/*" class="w-full text-xs border p-1 rounded bg-gray-50 file-upload" />
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div><label class="block text-xs font-semibold text-gray-600">Họ và Tên</label><input name="BanSangLaps[INDEX].HoTen" class="w-full border rounded-lg p-2 text-sm font-bold" /></div>
+            <div><label class="block text-xs font-semibold text-gray-600">Vai trò</label><input name="BanSangLaps[INDEX].ChucVuChinh" class="w-full border rounded-lg p-2 text-sm" /></div>
+            <div><label class="block text-xs font-semibold text-gray-600">Link Facebook</label><input name="BanSangLaps[INDEX].LinkFacebook" class="w-full border rounded-lg p-2 text-sm" /></div>
+            <div class="flex items-center pt-5">
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="BanSangLaps[INDEX].CoHuyHieuSao" value="true" class="w-4 h-4 accent-amber-500" />
+                    <span class="text-xs font-bold text-amber-600">⭐ Huy hiệu Ngôi Sao</span>
+                </label>
+            </div>
+            <div class="sm:col-span-2"><label class="block text-xs font-semibold text-gray-600">Giới thiệu</label><textarea name="BanSangLaps[INDEX].MoTaChiTiet" rows="3" class="w-full border rounded-lg p-2 text-sm"></textarea></div>
+        </div>
+    </div>
+</div>
+
+<div id="templateMember" class="hidden">
+    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm relative r-item space-y-3">
+        <button type="button" class="absolute top-2 right-2 text-red-500 hover:bg-red-50 px-2 py-0.5 rounded text-xs font-bold btn-remove">✕</button>
+        <input type="hidden" name="ThanhVienBTCs[INDEX].NhomHienThi" value="Member" />
+        <div>
+            <label class="block text-[11px] font-bold text-gray-500">Ảnh đại diện</label>
+            <input type="file" name="ThanhVienBTCs[INDEX].FileAnh" accept="image/*" class="w-full text-xs border p-1 rounded file-upload" />
+        </div>
+        <div><label class="block text-xs font-semibold text-gray-600">Họ và Tên</label><input name="ThanhVienBTCs[INDEX].HoTen" class="w-full border rounded-lg p-1.5 text-sm font-bold" /></div>
+        <div><label class="block text-xs font-semibold text-gray-600">Chức vụ</label><input name="ThanhVienBTCs[INDEX].ChucVuChinh" class="w-full border rounded-lg p-1.5 text-sm" /></div>
+        <div><label class="block text-xs font-semibold text-gray-600">Link Facebook</label><input name="ThanhVienBTCs[INDEX].LinkFacebook" class="w-full border rounded-lg p-1.5 text-xs" /></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('active', 'text-emerald-700', 'bg-emerald-50');
+                    b.classList.add('text-gray-500');
+                });
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+
+                btn.classList.remove('text-gray-500');
+                btn.classList.add('active', 'text-emerald-700', 'bg-emerald-50');
+                document.getElementById(btn.dataset.target).classList.remove('hidden');
+            });
+        });
+
+        window.addRepeaterItem = function(containerId, templateId) {
+            const container = document.getElementById(containerId);
+            const template = document.getElementById(templateId).innerHTML;
+            container.insertAdjacentHTML('beforeend', template);
+            reindexElements(container);
+        };
+
+        function reindexElements(container) {
+            const items = container.querySelectorAll('.r-item');
+            items.forEach((item, index) => {
+                item.querySelectorAll('input, select, textarea').forEach(input => {
+                    const name = input.getAttribute('name');
+                    if (name) {
+                        input.setAttribute('name', name.replace(/\[\d+\]|[INDEX]/g, `[${index}]`));
+                    }
+                });
+            });
+        }
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('btn-remove')) {
+                if (confirm('Xác nhận xóa nhân sự này?')) {
+                    const item = e.target.closest('.r-item');
+                    const container = item.parentElement;
+                    item.remove();
+                    reindexElements(container);
+                }
+            }
+        });
+    </script>
+}

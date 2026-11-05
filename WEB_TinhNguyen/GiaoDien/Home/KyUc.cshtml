@@ -1,0 +1,154 @@
+@model WEB_TinhNguyen.MoHinh.CauHinhKyUc
+
+@{
+    ViewData["Title"] = "Nhìn lại mùa " + ViewBag.Nam;
+    var conf = Model ?? new CauHinhKyUc();
+}
+
+<style>
+    .dynamic-font {
+        font-family: '@(conf.FontTieuDe ?? "Dancing Script")', cursive !important;
+    }
+
+    .dynamic-font-tongket {
+        font-family: '@(conf.FontTieuDeTongKet ?? "Be Vietnam Pro")', sans-serif !important;
+    }
+</style>
+
+<main class="w-full">
+    <!-- HERO SECTION ĐỘNG -->
+    <section class="relative flex items-center overflow-hidden px-6 text-center min-h-[90svh] py-24 sm:py-32 bg-gradient-to-b from-emerald-50/70 via-white to-volunteer-50/30 dark:from-volunteer-night dark:via-volunteer-card dark:to-volunteer-night transition-colors duration-300">
+        <!-- Lớp ảnh nền -->
+        <div class="absolute inset-0 -z-10 overflow-hidden">
+            @if (!string.IsNullOrEmpty(conf.LinkAnhBia))
+            {
+                <img alt="Hero Banner" src="@conf.LinkAnhBia" class="object-cover h-full w-full opacity-40 dark:opacity-20 transition-all duration-500 scale-105" />
+            }
+            else
+            {
+                <img alt="Hero Banner" src="/gallery/team.jpg" class="object-cover h-full w-full opacity-40 dark:opacity-20 transition-all duration-500 scale-105" />
+            }
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-white/80 to-white dark:via-volunteer-night/80 dark:to-volunteer-night"></div>
+        </div>
+
+        <!-- Nội dung nổi lên trên -->
+        <div class="relative z-10 mx-auto w-full max-w-3xl animate-fade-in-up">
+            <span class="mb-4 inline-block rounded-full px-5 py-2 text-xs font-black uppercase tracking-[0.2em] bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shadow-xs">
+                Hồi ức mùa @ViewBag.Nam
+            </span>
+
+            <h1 class="font-display pb-3 font-bold leading-[1.18] sm:pb-5 text-4xl sm:text-6xl md:text-7xl dynamic-font text-volunteer-text dark:text-white drop-shadow-sm">
+                @conf.TieuDeChinh
+            </h1>
+
+            <p class="mx-auto mt-5 max-w-xl text-base sm:text-lg font-medium text-volunteer-text/80 dark:text-slate-300 leading-relaxed">
+                @conf.DoanVanMoTa
+            </p>
+        </div>
+    </section>
+
+    <!-- TỔNG KẾT HÀNH TRÌNH ĐỘNG -->
+    <section class="relative py-20 sm:py-28 bg-white dark:bg-volunteer-night border-y border-emerald-100 dark:border-white/10 transition-colors duration-300">
+        <div class="mx-auto max-w-6xl px-6">
+            <div class="mx-auto mb-16 max-w-3xl text-center">
+                <span class="mb-3 inline-block rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-4 py-1.5 text-xs font-bold uppercase tracking-widest border border-emerald-200 dark:border-emerald-800">Tổng kết hành trình</span>
+
+                <h2 class="text-3xl font-black leading-tight sm:text-4xl md:text-5xl dynamic-font-tongket text-volunteer-text dark:text-white mt-2">
+                    @conf.TieuDeTongKet
+                </h2>
+                <div class="w-16 h-1 mx-auto rounded-full mt-4 bg-emerald-600"></div>
+            </div>
+            <div class="relative mx-auto max-w-4xl">
+                <div class="relative rounded-3xl bg-emerald-50/50 dark:bg-volunteer-card p-6 sm:p-10 border border-emerald-200/70 dark:border-white/10 shadow-sm">
+                    <div class="tsl-prose text-base leading-relaxed text-volunteer-text/85 dark:text-slate-200 sm:text-lg">
+                        @Html.Raw(conf.NoiDungTongKetHtml ?? "<p>Nội dung đang cập nhật...</p>")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- GALLERY ẢNH ĐỘNG -->
+    <section class="relative py-20 sm:py-28 bg-slate-50/50 dark:bg-volunteer-night transition-colors duration-300">
+        <div class="mx-auto max-w-7xl px-6">
+            <div class="mx-auto max-w-2xl text-center mb-14">
+                <span class="mb-3 inline-block rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-4 py-1.5 text-xs font-bold uppercase tracking-widest border border-emerald-200 dark:border-emerald-800">Thư viện ảnh</span>
+                <h2 class="whitespace-pre-line text-3xl font-black leading-tight text-volunteer-text dark:text-white sm:text-4xl mt-2">Khoảnh khắc mùa @ViewBag.Nam</h2>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-5" id="lightgallery">
+                @if (conf.AnhKyUcs != null && conf.AnhKyUcs.Any())
+                {
+                    foreach (var img in conf.AnhKyUcs.OrderBy(x => x.ThuTu))
+                    {
+                        <button type="button" data-src="@img.LinkAnh" class="group relative block cursor-pointer rounded-3xl outline-none overflow-hidden @(img.LaAnhDoc ? "row-span-2" : "") shadow-sm hover:shadow-xl transition-all duration-300">
+                            <div class="group relative overflow-hidden rounded-3xl bg-emerald-50 dark:bg-white/5 h-full w-full aspect-square border border-emerald-100 dark:border-white/10">
+                                <img alt="@img.TieuDeAnh" src="@img.LinkAnh" class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                                <div class="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+                            </div>
+                            <span class="pointer-events-none absolute inset-x-0 bottom-0 translate-y-2 p-4 text-left text-sm font-bold text-white opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 drop-shadow-md">
+                                @img.TieuDeAnh
+                            </span>
+                        </button>
+                    }
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- NHÀ TÀI TRỢ ĐỘNG -->
+    <section class="relative overflow-x-hidden py-16 sm:py-24 bg-white dark:bg-volunteer-night border-t border-emerald-100 dark:border-white/10 transition-colors duration-300">
+        <div class="mx-auto max-w-7xl px-5 sm:px-6">
+            <div class="mx-auto max-w-3xl text-center mb-12">
+                <span class="mb-4 sm:mb-6 inline-block rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 px-5 py-2 text-xs font-bold uppercase tracking-widest border border-amber-200 dark:border-amber-800">Đơn vị đồng hành</span>
+                <h2 class="whitespace-pre-line text-3xl font-black leading-tight text-volunteer-text dark:text-white sm:text-4xl mt-2">
+                    Cảm ơn những <span class="inline-block text-amber-600 dark:text-amber-400">tấm lòng vàng</span>
+                </h2>
+                <p class="mt-4 text-base text-volunteer-text/75 dark:text-slate-300 sm:text-lg font-medium">Sự đồng hành của các đơn vị giúp ánh trăng của chúng mình toả sáng hơn bao giờ hết.</p>
+            </div>
+
+            @if (conf.NhaTaiTroKyUcs != null && conf.NhaTaiTroKyUcs.Any())
+            {
+                var groupedSponsors = conf.NhaTaiTroKyUcs.GroupBy(n => n.PhanLoai);
+
+                <div class="mt-12 space-y-10 sm:mt-14 sm:space-y-12">
+                    @foreach (var group in groupedSponsors)
+                    {
+                        <div class="w-full">
+                            <div class="mb-5 flex items-center gap-4">
+                                <h3 class="text-sm font-bold uppercase tracking-widest text-emerald-800 dark:text-emerald-400">@group.Key</h3>
+                                <div class="h-px flex-1 bg-gradient-to-r from-emerald-300 to-transparent dark:from-emerald-800"></div>
+                            </div>
+
+                            <div class="flex flex-wrap justify-center gap-5 sm:gap-6">
+                                @foreach (var sponsor in group)
+                                {
+                                    <button type="button" title="@sponsor.TenDonVi" aria-label="Xem giới thiệu @sponsor.TenDonVi" class="group relative flex h-28 w-44 items-center justify-center rounded-2xl bg-white dark:bg-volunteer-card p-5 ring-1 ring-emerald-100 dark:ring-white/10 transition hover:-translate-y-1.5 sm:h-32 sm:w-56 sm:p-6 shadow-sm hover:shadow-md cursor-pointer">
+                                        @if (!string.IsNullOrEmpty(sponsor.LinkLogo))
+                                        {
+                                            <img alt="@sponsor.TenDonVi" src="@sponsor.LinkLogo" class="object-contain w-full h-full transition duration-300 group-hover:scale-105" />
+                                        }
+                                        else
+                                        {
+                                            <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        }
+
+                                        <span class="pointer-events-none absolute left-1/2 top-full z-10 mt-2 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-full bg-emerald-900 text-white dark:bg-white dark:text-slate-900 px-3 py-1 text-xs font-semibold opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100 shadow-md">
+                                            @sponsor.TenDonVi
+                                        </span>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center text-volunteer-text/60 dark:text-slate-400 py-10 italic">
+                    Chưa có dữ liệu nhà tài trợ cho mùa này.
+                </div>
+            }
+        </div>
+    </section>
+</main>

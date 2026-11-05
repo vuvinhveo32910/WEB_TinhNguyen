@@ -1,0 +1,677 @@
+@model WEB_TinhNguyen.MoHinh.CauHinhTrangChu
+@{
+    ViewData["Title"] = "Trang Chủ - " + (Model?.TieuDeChinh ?? "Chiến dịch");
+    Layout = "~/GiaoDien/Shared/_Layout.cshtml";
+
+    string fontTieuDeUrl = Model?.FontTieuDe != null ? Model.FontTieuDe.Replace(" ", "+") : "Dancing+Script";
+    string fontNoiDungUrl = Model?.FontNoiDung != null ? Model.FontNoiDung.Replace(" ", "+") : "Be+Vietnam+Pro";
+
+    var explore = new[] {
+        (Href: "/Home/GayQuy", Icon: "🛒", Title: "Không gian Yêu Thương", Desc: "Ủng hộ qua chuyển khoản hoặc hiện vật."),
+        (Href: "/Home/BanToChuc", Icon: "👥", Title: "Ban sáng lập & Tổ chức", Desc: "Những người đứng sau hành trình."),
+        (Href: "/Home/ChuongTrinh", Icon: "🗓️", Title: "Chương trình 2026", Desc: "Các hoạt động và lịch trình."),
+        (Href: "/Home/TinTuc", Icon: "📰", Title: "Bản tin", Desc: "Nhật ký và tin mới nhất về dự án.")
+    };
+
+    // ĐÂY LÀ ĐOẠN ĐÃ FIX LỖI CS0103: KHAI BÁO BIẾN validEvents
+    var validEvents = Model?.ChuongTrinhDemNguocs?
+        .Where(x => !string.IsNullOrWhiteSpace(x.TieuDeChinh) || !string.IsNullOrWhiteSpace(x.TieuDePhu))
+        .ToList() ?? new List<WEB_TinhNguyen.MoHinh.ChuongTrinhDemNguoc>();
+}
+
+<link href="https://fonts.googleapis.com/css2?family=@(fontTieuDeUrl):wght@400;700&family=@(fontNoiDungUrl):wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+<style>
+    :root {
+        --color-leaf-deep: #15803d;
+        --color-leaf: #22c55e;
+        --color-forest: #143823;
+        --font-heading: '@(Model?.FontTieuDe ?? "Dancing Script")', cursive;
+        --font-body: '@(Model?.FontNoiDung ?? "Be Vietnam Pro")', sans-serif;
+    }
+
+    body {
+        font-family: var(--font-body);
+        color: var(--color-forest);
+        background-color: #ffffff;
+    }
+
+    .font-display {
+        font-family: var(--font-heading);
+    }
+
+    .hero-swiper {
+        width: 100%;
+        height: 100%;
+    }
+
+    .swiper-slide-banner {
+        background-color: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+        .swiper-slide-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+        }
+
+    .event-swiper {
+        padding-bottom: 50px !important;
+        overflow: hidden;
+    }
+
+        .event-swiper .swiper-button-next,
+        .event-swiper .swiper-button-prev {
+            color: #9ca3af;
+            transform: scale(0.7);
+            top: 50%;
+        }
+
+    .tv-swiper {
+        padding-bottom: 0 !important;
+    }
+
+        .tv-swiper .swiper-pagination-bullet {
+            background: #ffffff;
+            opacity: 0.5;
+        }
+
+        .tv-swiper .swiper-pagination-bullet-active {
+            opacity: 1;
+            background: var(--color-leaf);
+        }
+
+        .tv-swiper .swiper-pagination {
+            bottom: 10px !important;
+        }
+
+    /* ĐỊNH DẠNG FAQ (ĐÃ FIX TRIỆT ĐỂ LỖI LỘ CHỮ KHI CHƯA MỞ) */
+    .faq-answer {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.35s ease-out;
+    }
+
+    .faq-item.active .faq-answer {
+        max-height: 500px;
+    }
+
+    .faq-item.active .faq-icon {
+        transform: rotate(45deg);
+        background-color: var(--color-leaf-deep);
+        color: white;
+    }
+</style>
+
+<div class="w-full">
+    <!-- KHỐI 1: BANNER ĐỘNG TỪ ADMIN -->
+    <div class="relative w-full h-[40vh] md:h-[60vh] lg:h-[75vh] bg-white overflow-hidden border-b border-gray-100 dark:border-gray-800">
+        <div class="swiper hero-swiper">
+            <div class="swiper-wrapper">
+                @if (Model != null && Model.BannerTrangChus != null && Model.BannerTrangChus.Any())
+                {
+                    foreach (var banner in Model.BannerTrangChus)
+                    {
+                        <div class="swiper-slide swiper-slide-banner">
+                            <img src="@banner.LinkAnh" alt="@banner.TieuDeAlt" />
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="swiper-slide swiper-slide-banner">
+                        <img src="@(Model?.LinkAnhBia ?? "https://images.unsplash.com/photo-1593113589914-075568e09121?q=80&w=1920&auto=format&fit=crop")" alt="Banner Mặc Định" />
+                    </div>
+                }
+            </div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-next" style="color: var(--color-leaf-deep);"></div>
+            <div class="swiper-button-prev" style="color: var(--color-leaf-deep);"></div>
+        </div>
+    </div>
+
+    <!-- KHỐI 2: DANH SÁCH CHƯƠNG TRÌNH ĐẾM NGƯỢC -->
+    @if (validEvents.Any())
+    {
+        <div class="relative w-full py-16 px-2 md:px-8 z-10 block bg-gray-50/50 dark:bg-night-2">
+            <div class="swiper event-swiper max-w-5xl mx-auto">
+                <div class="swiper-wrapper">
+                    @foreach (var ev in validEvents)
+                    {
+                        string startStr = ev.ThoiGianBatDau.ToString("yyyy-MM-ddTHH:mm:ss");
+                        string endStr = ev.ThoiGianKetThuc.ToString("yyyy-MM-ddTHH:mm:ss");
+
+                        <div class="swiper-slide px-4 md:px-12 bg-transparent">
+                            <!-- BỔ SUNG CLASS "keep-theme" BẢO VỆ CHỮ KHI DARK MODE -->
+                            <div class="countdown-card keep-theme mx-auto text-center backdrop-blur shadow-2xl rounded-[2.5rem] p-8 md:p-14 border border-white/50 w-full"
+                                 style="background: linear-gradient(to bottom right, #ffffff, #f8fafc);"
+                                 data-start="@startStr"
+                                 data-end="@endStr"
+                                 data-force="@ev.EpKetThuc.ToString().ToLower()">
+
+                                @if (!string.IsNullOrWhiteSpace(ev.TieuDePhu))
+                                 {
+                                     <span class="mb-4 inline-block rounded-full px-5 py-1.5 text-xs md:text-sm font-bold uppercase tracking-widest keep-color" style="background-color: #1b5e2020; color: #1b5e20;">
+                                         @ev.TieuDePhu
+                                     </span>
+                                 }
+
+                                @if (!string.IsNullOrWhiteSpace(ev.TieuDeChinh))
+                                 {
+                                     <h1 class="font-display text-5xl md:text-7xl font-bold mb-4 drop-shadow-sm leading-tight keep-color" style="color: #1b5e20;">
+                                         @Html.Raw(ev.TieuDeChinh.Replace("\n", "<br/>"))
+                                     </h1>
+                                 }
+
+                                @if (!string.IsNullOrWhiteSpace(ev.MoTa))
+                                 {
+                                     <p class="text-gray-600 text-lg md:text-xl max-w-2xl mx-auto mb-6 leading-relaxed keep-color" style="color: #4b5563;">
+                                         @ev.MoTa
+                                     </p>
+                                 }
+
+                                @if (!string.IsNullOrWhiteSpace(ev.ThoiGianHienThi))
+                                 {
+                                     <p class="font-bold text-lg mb-6 uppercase tracking-wider text-red-500 keep-color" style="color: #ef4444;">
+                                         @ev.ThoiGianHienThi
+                                     </p>
+                                 }
+
+                                <div class="status-container min-h-[120px] flex items-center justify-center mb-8">
+                                     <div class="countdown-boxes flex flex-wrap justify-center gap-3 md:gap-5">
+                                         <div class="flex flex-col items-center bg-white/80 shadow border border-gray-100 rounded-2xl p-4 w-20 md:w-28 keep-color">
+                                             <span class="d-val text-3xl md:text-5xl font-black keep-color" style="color: #1b5e20;">00</span>
+                                             <span class="text-[10px] md:text-xs text-gray-500 font-bold mt-2 uppercase tracking-wider keep-color" style="color: #6b7280;">Ngày</span>
+                                         </div>
+                                         <div class="flex flex-col items-center bg-white/80 shadow border border-gray-100 rounded-2xl p-4 w-20 md:w-28 keep-color">
+                                             <span class="h-val text-3xl md:text-5xl font-black keep-color" style="color: #1b5e20;">00</span>
+                                             <span class="text-[10px] md:text-xs text-gray-500 font-bold mt-2 uppercase tracking-wider keep-color" style="color: #6b7280;">Giờ</span>
+                                         </div>
+                                         <div class="flex flex-col items-center bg-white/80 shadow border border-gray-100 rounded-2xl p-4 w-20 md:w-28 keep-color">
+                                             <span class="m-val text-3xl md:text-5xl font-black keep-color" style="color: #1b5e20;">00</span>
+                                             <span class="text-[10px] md:text-xs text-gray-500 font-bold mt-2 uppercase tracking-wider keep-color" style="color: #6b7280;">Phút</span>
+                                         </div>
+                                         <div class="flex flex-col items-center bg-white/80 shadow border border-gray-100 rounded-2xl p-4 w-20 md:w-28 keep-color">
+                                             <span class="s-val text-3xl md:text-5xl font-black keep-color" style="color: #1b5e20;">00</span>
+                                             <span class="text-[10px] md:text-xs text-gray-500 font-bold mt-2 uppercase tracking-wider keep-color" style="color: #6b7280;">Giây</span>
+                                         </div>
+                                     </div>
+                                     <div class="status-msg hidden rounded-full px-8 py-3 text-lg md:text-xl font-black text-white shadow-lg tracking-widest uppercase keep-color">
+                                     </div>
+                                 </div>
+
+                                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                                     <a href="#register" class="px-8 py-3.5 rounded-full text-white font-bold shadow-md transition hover:-translate-y-1 hover:shadow-xl text-sm md:text-base keep-color" style="background-color: #1b5e20; color: #ffffff !important;">
+                                         Đăng ký đồng hành
+                                     </a>
+                                     <a href="#about" class="px-8 py-3.5 rounded-full font-bold shadow-sm bg-white/50 border-2 transition hover:-translate-y-1 hover:bg-white text-sm md:text-base keep-color" style="color: #1b5e20; border-color: #1b5e20;">
+                                         Tìm hiểu dự án
+                                     </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="swiper-pagination event-pagination"></div>
+                <div class="swiper-button-next event-btn-next"></div>
+                <div class="swiper-button-prev event-btn-prev"></div>
+            </div>
+        </div>
+    }
+</div>
+
+<main>
+    <!-- 3. VỀ DỰ ÁN -->
+    <section id="about" class="relative py-20 sm:py-32 bg-white dark:bg-night transition-colors duration-300">
+        <div class="mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-2">
+            <div class="relative order-2 lg:order-1">
+                <div class="relative overflow-hidden rounded-3xl bg-gray-100 aspect-[4/5] shadow-2xl transition hover:shadow-3xl">
+                    <img alt="Về dự án" class="object-cover w-full h-full" src="@(Model?.VeDuAn_LinkAnh ?? "https://trangsang.vn/gallery/2025/bro02328.jpg")">
+                    <div class="absolute -bottom-6 -left-6 w-32 h-32 opacity-30 rounded-full blur-2xl" style="background-color: #4caf50;"></div>
+                </div>
+            </div>
+
+            <div class="order-1 lg:order-2">
+                <span class="mb-4 inline-block rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white shadow-sm" style="background-color: #4caf50;">
+                    Về dự án
+                </span>
+                <h2 class="text-4xl md:text-5xl lg:text-6xl font-black leading-tight font-display mb-8" style="color: #1b5e20;">
+                    @(Model?.VeDuAn_TieuDe ?? "Mang ánh trăng ấm áp đến với núi rừng cao nguyên")
+                </h2>
+
+                <div class="tinymce-content max-w-none leading-relaxed">
+                    @if (!string.IsNullOrEmpty(Model?.VeDuAn_NoiDung))
+                    {
+                        @Html.Raw(Model.VeDuAn_NoiDung)
+                    }
+                    else
+                    {
+                        <p>Nội dung đang được cập nhật...</p>
+                    }
+                </div>
+                <style>
+                                    .tinymce-content, .tinymce-content * {
+                                        color: #374151 !important;
+                                    }
+                </style>
+                <div class="mt-10">
+                    <a href="#explore" class="inline-flex items-center gap-2 font-bold transition group" style="color: #4caf50;">
+                        Khám phá thêm về chúng tôi
+                        <svg class="w-5 h-5 transition transform group-hover:translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. TIVI KHOẢNH KHẮC -->
+    <section id="gallery" aria-label="Khoảnh khắc chương trình" class="relative flex min-h-[100svh] items-center justify-center overflow-hidden bg-gradient-to-b from-gray-50 to-gray-200 px-4 py-16 dark:from-night-2 dark:to-night transition-colors duration-300">
+        <div class="w-full relative z-10">
+            <div class="mx-auto max-w-2xl text-center mb-10 md:mb-14">
+                <span class="mb-4 inline-block rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white shadow-sm" style="background-color: #4caf50;">
+                    Khoảnh khắc
+                </span>
+                <h2 class="text-3xl font-extrabold sm:text-4xl md:text-5xl font-display drop-shadow-sm" style="color: #2e7d32;">
+                    Nhìn lại hành trình
+                </h2>
+            </div>
+
+            <div class="group relative w-full max-w-5xl mx-auto">
+                <div class="relative z-10 rounded-[2rem] p-3 shadow-2xl" style="background-color: #2e7d32;">
+                    <div class="flex gap-3 sm:gap-4">
+                        <div class="min-w-0 flex-1 rounded-2xl bg-black p-2 shadow-inner">
+                            <div class="relative overflow-hidden rounded-xl bg-black">
+                                <div class="swiper tv-swiper w-full h-full">
+                                    <div class="swiper-wrapper">
+                                        @if (Model != null && Model.TVKhoanhKhacs != null && Model.TVKhoanhKhacs.Any())
+                                        {
+                                            foreach (var s in Model.TVKhoanhKhacs)
+                                            {
+                                                <div class="swiper-slide relative aspect-[4/3] min-w-0 flex-[0_0_100%] sm:aspect-video bg-black flex items-center justify-center">
+                                                    <img alt="@s.TieuDe" class="select-none object-contain w-full h-full" src="@s.LinkAnh">
+                                                    <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent px-4 pb-6 pt-12 sm:px-6 sm:pb-8 text-left">
+                                                        <p class="text-base font-bold leading-snug text-white sm:text-xl md:text-2xl drop-shadow-md keep-color">@s.TieuDe</p>
+                                                        <p class="mt-1 text-xs sm:text-sm text-gray-300 drop-shadow keep-color">@s.MoTa</p>
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <div class="swiper-slide relative aspect-video w-full flex items-center justify-center text-white bg-gray-900">
+                                                Chưa có khoảnh khắc nào được thêm.
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="swiper-button-next tv-btn-next !text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 drop-shadow-lg scale-75 md:scale-100"></div>
+                                    <div class="swiper-button-prev tv-btn-prev !text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 drop-shadow-lg scale-75 md:scale-100"></div>
+                                    <div class="swiper-pagination tv-pagination"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. BẢN TIN -->
+    <section id="news" class="relative py-16 sm:py-24 bg-white dark:bg-night transition-colors duration-300">
+        <div class="mx-auto max-w-7xl px-5 sm:px-6">
+            <div class="mx-auto max-w-2xl text-center">
+                <span class="mb-4 inline-block rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white" style="background-color: #4caf50;">Bản tin</span>
+                <h2 class="text-3xl font-extrabold sm:text-4xl md:text-5xl font-display" style="color: #2e7d32;">Câu chuyện từ hành trình</h2>
+            </div>
+
+            <div class="mt-10 grid gap-6 sm:mt-14 md:grid-cols-3">
+                @if (Model != null && Model.TinTucs != null)
+                {
+                    foreach (var n in Model.TinTucs.Where(x => !string.IsNullOrWhiteSpace(x.TieuDe)))
+                    {
+                        <div class="group relative flex h-full flex-col overflow-hidden rounded-3xl bg-gray-50 dark:bg-night-2 ring-1 ring-gray-200 dark:ring-gray-800 shadow-sm hover:shadow-md transition">
+                            <div class="relative aspect-[16/10] w-full overflow-hidden bg-black/5">
+                                <img alt="@n.TieuDe" class="h-full w-full object-cover group-hover:scale-105 transition duration-500" src="@n.LinkAnh">
+                                <span class="absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-bold text-white" style="background-color: #4caf50;">@n.ThePhanLoai</span>
+                            </div>
+                            <div class="flex flex-1 flex-col p-5 sm:p-6">
+                                <h3 class="font-bold font-display" style="color: #2e7d32; font-size: @(n.KichCoTieuDe ?? "18px"); line-height: 1.3;">
+                                    @n.TieuDe
+                                </h3>
+                                <p class="mt-3 text-sm text-gray-600 dark:text-gray-300 line-clamp-3">@n.TrichDan</p>
+
+                                <div class="mt-auto pt-4 flex items-center justify-between text-sm font-semibold border-t border-gray-200 dark:border-gray-700 mt-4">
+                                    <button type="button" onclick="openNewsModal(`@n.TieuDe`, `@Html.Raw(n.NoiDungChiTiet?.Replace("\"", "&quot;").Replace("`", "\\`").Replace("\n", ""))`, `@n.LinkAnh`)"
+                                            class="cursor-pointer hover:underline" style="color: #4caf50;">
+                                        Đọc tiếp &rarr;
+                                    </button>
+
+                                    <button type="button" onclick="likeNews(this)" class="flex items-center gap-1 text-gray-400 hover:text-red-500 transition-colors">
+                                        <svg class="w-5 h-5 heart-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
+                                        <span class="like-count">@n.LuotThich</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. TÀI TRỢ & ĐƠN VỊ TỔ CHỨC -->
+    <section class="relative overflow-x-hidden py-16 sm:py-24 bg-gray-50 dark:bg-night-2 transition-colors duration-300">
+        <div class="mx-auto max-w-7xl px-5 sm:px-6 text-center">
+            <div class="mx-auto max-w-2xl text-center mb-10 sm:mb-16">
+                <span class="mb-4 inline-block rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white shadow-sm" style="background-color: #4caf50;">
+                    Đồng hành
+                </span>
+                <h2 class="text-3xl font-extrabold sm:text-4xl md:text-5xl font-display" style="color: #2e7d32;">
+                    Đơn vị tổ chức & Tài trợ
+                </h2>
+            </div>
+
+            <div class="flex flex-wrap justify-center items-start gap-x-10 gap-y-12">
+                @if (Model != null && Model.NhaTaiTros != null && Model.NhaTaiTros.Any())
+                {
+                    foreach (var group in Model.NhaTaiTros.GroupBy(x => x.NhomTaiTro))
+                    {
+                        <div class="flex flex-col items-center">
+                            <h3 class="text-sm md:text-base font-bold uppercase tracking-widest mb-6 inline-block border-b-2 pb-1 px-4" style="color: #4caf50; border-color: #4caf50;">
+                                @group.Key
+                            </h3>
+                            <div class="flex flex-wrap justify-center gap-4 sm:gap-6">
+                                @foreach (var sp in group)
+                                {
+                                    <div class="group relative flex items-center justify-center w-36 h-36 sm:w-44 sm:h-44 rounded-3xl bg-white dark:bg-gray-800 p-3 sm:p-5 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:ring-2" style="--tw-ring-color: #2e7d32;">
+                                        <img alt="@sp.TenDonVi" class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-110" src="@sp.LinkLogo">
+                                        <div class="absolute -bottom-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs px-3 py-1.5 rounded-lg shadow-lg z-20 font-semibold">
+                                            @sp.TenDonVi
+                                            <div class="absolute w-2 h-2 bg-gray-900 dark:bg-white rotate-45 left-1/2 -top-1 -translate-x-1/2"></div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center text-gray-500 py-10 w-full">Chưa có thông tin đơn vị tổ chức/tài trợ.</div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. FAQ -->
+    <section id="faq" class="relative pb-24 sm:pb-32 bg-white dark:bg-night pt-16 transition-colors duration-300">
+        <div class="mx-auto max-w-7xl px-6">
+            <div class="text-center mb-16">
+                <span class="inline-block rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white shadow-sm" style="background-color: #4caf50;">
+                    Hỏi đáp
+                </span>
+                <h2 class="text-3xl font-extrabold sm:text-4xl md:text-5xl font-display mt-4" style="color: #2e7d32;">
+                    Câu hỏi thường gặp
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                @if (Model != null && Model.FAQs != null && Model.FAQs.Any())
+                {
+                    var faqList = Model.FAQs.Where(x => !string.IsNullOrWhiteSpace(x.CauHoi)).ToList();
+                    for (int i = 0; i < faqList.Count; i++)
+                    {
+                        var q = faqList[i];
+                        <div class="faq-item group overflow-hidden rounded-2xl bg-gray-50 dark:bg-night-2 ring-1 ring-gray-200 dark:ring-gray-800 transition-all hover:shadow-md cursor-pointer">
+                            <div class="faq-question flex items-center justify-between p-6 w-full" onclick="toggleFaq(this)">
+                                <h3 class="text-lg font-bold pr-4" style="color: #2e7d32;">@q.CauHoi</h3>
+                                <span class="faq-icon flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300 transition-transform duration-300">
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <div class="faq-answer">
+                                <div class="px-6 pb-6 pt-0 text-gray-600 dark:text-gray-300 leading-relaxed border-t border-gray-200 dark:border-gray-700 mx-6 mt-2">
+                                    <p class="pt-4">@q.CauTraLoi</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-span-1 md:col-span-2 text-center text-gray-500 py-10">Chưa có câu hỏi nào được thêm.</div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. KHÁM PHÁ THÊM -->
+    <section id="explore" class="relative bg-gray-50 dark:bg-night-2 py-16 sm:py-24 transition-colors duration-300">
+        <div class="mx-auto max-w-7xl px-5 sm:px-6">
+            <div class="mx-auto max-w-2xl text-center">
+                <span class="mb-4 inline-block rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white" style="background-color: #4caf50;">Khám phá thêm</span>
+                <h2 class="text-3xl font-extrabold sm:text-4xl" style="color: #2e7d32;">Tìm hiểu sâu hơn về dự án</h2>
+            </div>
+            <div class="mt-10 grid gap-4 sm:mt-14 sm:grid-cols-2 lg:grid-cols-3">
+                @foreach (var e in explore)
+                {
+                    <a class="group flex items-start gap-4 rounded-3xl bg-white dark:bg-night p-5 ring-1 ring-gray-200 dark:ring-gray-800 transition hover:-translate-y-1 hover:shadow-md sm:p-6" href="@e.Href">
+                        <span class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl text-2xl text-white" style="background-color: #4caf50;">@e.Icon</span>
+                        <span class="min-w-0">
+                            <span class="flex items-center gap-1.5 text-base font-bold dark:text-white" style="color: #2e7d32;">@e.Title &rarr;</span>
+                            <span class="mt-1 block text-sm leading-relaxed text-gray-600 dark:text-gray-300">@e.Desc</span>
+                        </span>
+                    </a>
+                }
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- BẢNG POPUP CHI TIẾT BẢN TIN -->
+<div id="newsModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 backdrop-blur-sm px-4 transition-opacity opacity-0">
+    <div class="bg-white dark:bg-night-2 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl transform scale-95 transition-transform duration-300" id="newsModalContent">
+        <div class="flex justify-between items-center p-5 border-b border-gray-100 dark:border-gray-800">
+            <h3 id="modalTitle" class="text-xl md:text-2xl font-bold font-display" style="color: #2e7d32;">Chi tiết bản tin</h3>
+            <button onclick="closeNewsModal()" class="text-gray-400 hover:text-red-500 bg-gray-100 dark:bg-gray-800 hover:bg-red-50 rounded-full p-2 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="p-6 md:p-8 overflow-y-auto">
+            <div id="modalBody" class="tinymce-content prose prose-lg max-w-none leading-relaxed text-gray-700 dark:text-gray-200">
+            </div>
+            <img id="modalImage" src="" alt="Ảnh Bản Tin" class="mt-6 w-full rounded-2xl shadow-md object-cover max-h-[60vh] hidden" />
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. CHẠY SLIDER BANNER TRÊN CÙNG
+            var sliderSpeed = @(Model?.TocDoChuyenSlide > 0 ? Model.TocDoChuyenSlide : 4000);
+            var swiper = new Swiper(".hero-swiper", {
+                loop: true,
+                autoplay: {
+                    delay: sliderSpeed,
+                    disableOnInteraction: false,
+                },
+                pagination: {
+                    el: ".hero-swiper .swiper-pagination",
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: ".hero-swiper .swiper-button-next",
+                    prevEl: ".hero-swiper .swiper-button-prev",
+                },
+            });
+
+            // 2. CHẠY SLIDER CHO CÁC SỰ KIỆN ĐẾM NGƯỢC
+            if (document.querySelector('.event-swiper')) {
+                var eventSwiper = new Swiper(".event-swiper", {
+                    slidesPerView: 1,
+                    spaceBetween: 50,
+                    loop: false,
+                    pagination: {
+                        el: ".event-pagination",
+                        clickable: true,
+                        dynamicBullets: true,
+                    },
+                    navigation: {
+                        nextEl: ".event-btn-next",
+                        prevEl: ".event-btn-prev",
+                    },
+                });
+            }
+
+            // 3. LOGIC BỘ ĐẾM NGƯỢC
+            const cards = document.querySelectorAll('.countdown-card');
+            if (cards.length > 0) {
+                setInterval(function() {
+                    const now = new Date().getTime();
+                    cards.forEach(card => {
+                        const startStr = card.getAttribute('data-start');
+                        const endStr = card.getAttribute('data-end');
+                        const isForceEnded = card.getAttribute('data-force') === 'true';
+
+                        const startTime = new Date(startStr).getTime();
+                        const endTime = new Date(endStr).getTime();
+
+                        const boxContainer = card.querySelector('.countdown-boxes');
+                        const msgContainer = card.querySelector('.status-msg');
+
+                        if (isForceEnded || now >= endTime) {
+                            boxContainer.style.display = 'none';
+                            msgContainer.style.display = 'inline-block';
+                            msgContainer.style.backgroundColor = '#9ca3af';
+                            msgContainer.innerText = 'ĐÃ KẾT THÚC';
+                        }
+                        else if (now >= startTime && now < endTime) {
+                            boxContainer.style.display = 'none';
+                            msgContainer.style.display = 'inline-block';
+                            msgContainer.style.backgroundColor = '#ef4444';
+                            msgContainer.innerText = 'SỰ KIỆN ĐANG DIỄN RA';
+                        }
+                        else {
+                            boxContainer.style.display = 'flex';
+                            msgContainer.style.display = 'none';
+
+                            const distance = startTime - now;
+                            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                            card.querySelector('.d-val').innerText = days < 10 ? "0" + days : days;
+                            card.querySelector('.h-val').innerText = hours < 10 ? "0" + hours : hours;
+                            card.querySelector('.m-val').innerText = minutes < 10 ? "0" + minutes : minutes;
+                            card.querySelector('.s-val').innerText = seconds < 10 ? "0" + seconds : seconds;
+                        }
+                    });
+                }, 1000);
+            }
+
+            // 4. CHẠY SLIDER CHO TIVI KHOẢNH KHẮC
+            var tvSwiper = new Swiper(".tv-swiper", {
+                loop: true,
+                autoplay: {
+                    delay: 3500,
+                    disableOnInteraction: false,
+                },
+                effect: "fade",
+                fadeEffect: {
+                    crossFade: true
+                },
+                pagination: {
+                    el: ".tv-pagination",
+                    clickable: true,
+                    dynamicBullets: true,
+                },
+                navigation: {
+                    nextEl: ".tv-btn-next",
+                    prevEl: ".tv-btn-prev",
+                },
+            });
+        });
+
+        // --- LOGIC BẢN TIN ---
+        window.likeNews = function(btn) {
+            let countSpan = btn.querySelector('.like-count');
+            let icon = btn.querySelector('.heart-icon');
+            if (!btn.classList.contains('liked')) {
+                countSpan.innerText = parseInt(countSpan.innerText) + 1;
+                btn.classList.add('liked', 'text-red-500');
+                icon.classList.add('scale-125', 'transition-transform');
+                setTimeout(() => icon.classList.remove('scale-125'), 200);
+            }
+        };
+
+        window.openNewsModal = function(title, htmlContent, imageUrl) {
+            const modal = document.getElementById('newsModal');
+            const modalBox = document.getElementById('newsModalContent');
+            const modalImage = document.getElementById('modalImage');
+
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalBody').innerHTML = htmlContent;
+
+            if (imageUrl && imageUrl.trim() !== '') {
+                modalImage.src = imageUrl;
+                modalImage.classList.remove('hidden');
+                modalImage.classList.add('block');
+            } else {
+                modalImage.src = '';
+                modalImage.classList.remove('block');
+                modalImage.classList.add('hidden');
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalBox.classList.remove('scale-95');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeNewsModal = function() {
+            const modal = document.getElementById('newsModal');
+            const modalBox = document.getElementById('newsModalContent');
+
+            modal.classList.add('opacity-0');
+            modalBox.classList.add('scale-95');
+
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }, 300);
+        };
+
+        document.getElementById('newsModal').addEventListener('click', function(e) {
+            if (e.target === this) closeNewsModal();
+        });
+
+        // --- LOGIC FAQ (ACCORDION) ---
+        window.toggleFaq = function(element) {
+            const parent = element.parentElement;
+            const isActive = parent.classList.contains('active');
+
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            if (!isActive) {
+                parent.classList.add('active');
+            }
+        };
+    </script>
+}

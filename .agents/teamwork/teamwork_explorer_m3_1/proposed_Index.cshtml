@@ -1,0 +1,281 @@
+@model IEnumerable<WEB_TinhNguyen.Areas.CuaHang.Models.SanPhamGayQuy>
+@{
+    ViewData["Title"] = "Cửa Hàng Gây Quỹ - Trăng Sáng Langbiang 2026";
+    var categories = ViewBag.Categories as List<string> ?? new List<string>();
+    var currentCat = ViewBag.CurrentCategory as string ?? "Tất cả";
+    var currentSearch = ViewBag.CurrentSearch as string ?? "";
+    var currentSort = ViewBag.CurrentSort as string ?? "";
+    var totalCount = ViewBag.TotalCount != null ? (int)ViewBag.TotalCount : (Model?.Count() ?? 0);
+}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+    <!-- HERO BANNER: THÔNG ĐIỆP GÂY QUỸ CHIẾN DỊCH -->
+    <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#143220] via-[#1b432b] to-[#0c1f14] text-white p-8 sm:p-12 md:p-14 shadow-2xl border border-emerald-500/20">
+        <!-- Background Decorative Accents -->
+        <div class="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-20 -bottom-20 w-80 h-80 rounded-full bg-green-400/10 blur-3xl pointer-events-none"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px] opacity-5 pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-3xl space-y-5">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 backdrop-blur-md">
+                <i class="fas fa-heart text-rose-400 animate-pulse"></i>
+                <span>Chiến Dịch Tình Nguyện "Trăng Sáng Langbiang 2026"</span>
+            </div>
+
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
+                Cửa Hàng <span class="text-emerald-400">Gây Quỹ</span> Tình Nguyện
+            </h1>
+
+            <p class="text-sm sm:text-base md:text-lg text-emerald-100/90 leading-relaxed font-normal">
+                Mỗi sản phẩm bạn lựa chọn là một sự đóng góp thiết thực vào quỹ thiện nguyện, chung tay mang tới 200 suất quà Trung thu, 250 bữa ăn ấm nóng và công trình nước sạch học đường cho các em nhỏ đồng bào K'Ho dưới chân đỉnh Langbiang huyền thoại.
+            </p>
+
+            <!-- Impact Pillars -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
+                <div class="p-3.5 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 text-center">
+                    <div class="text-xl sm:text-2xl font-black text-emerald-300">100%</div>
+                    <div class="text-[11px] font-semibold text-emerald-100/80 uppercase tracking-wider mt-0.5">Lợi nhuận gây quỹ</div>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 text-center">
+                    <div class="text-xl sm:text-2xl font-black text-rose-300">200+</div>
+                    <div class="text-[11px] font-semibold text-emerald-100/80 uppercase tracking-wider mt-0.5">Em nhỏ vùng cao</div>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 text-center">
+                    <div class="text-xl sm:text-2xl font-black text-amber-300">250</div>
+                    <div class="text-[11px] font-semibold text-emerald-100/80 uppercase tracking-wider mt-0.5">Suất ăn ấm áp</div>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 text-center">
+                    <div class="text-xl sm:text-2xl font-black text-sky-300">100%</div>
+                    <div class="text-[11px] font-semibold text-emerald-100/80 uppercase tracking-wider mt-0.5">Minh bạch thu chi</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FLASH MESSAGES -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="flex items-center justify-between p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 shadow-sm animate-fade-in">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-check-circle text-emerald-600 text-xl"></i>
+                <span class="text-sm font-semibold">@TempData["SuccessMessage"]</span>
+            </div>
+            <a asp-area="CuaHang" asp-controller="GioHang" asp-action="Index" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition">
+                Xem giỏ hàng
+            </a>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="flex items-center gap-3 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-sm font-semibold shadow-sm">
+            <i class="fas fa-exclamation-circle text-rose-600 text-xl"></i>
+            <span>@TempData["ErrorMessage"]</span>
+        </div>
+    }
+
+    <!-- SEARCH & FILTER TOOLBAR -->
+    <div class="bg-white dark:bg-[#16261d] rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-white/10 space-y-4">
+        <form method="get" asp-area="CuaHang" asp-controller="CuaHang" asp-action="Index" id="filterForm">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <!-- Search Input -->
+                <div class="relative flex-1">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 dark:text-gray-500">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" name="q" value="@currentSearch"
+                           placeholder="Tìm kiếm theo tên sản phẩm, thông điệp gây quỹ..."
+                           class="w-full pl-10 pr-24 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-black/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition" />
+                    @if (!string.IsNullOrEmpty(currentSearch))
+                    {
+                        <a href="@Url.Action("Index", "CuaHang", new { area = "CuaHang", danhMuc = currentCat != "Tất cả" ? currentCat : null, sort = currentSort })"
+                           class="absolute inset-y-0 right-16 pr-2 flex items-center text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" title="Xóa tìm kiếm">
+                            <i class="fas fa-times-circle"></i>
+                        </a>
+                    }
+                    <button type="submit" class="absolute inset-y-1 right-1 px-3.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition">
+                        Tìm
+                    </button>
+                </div>
+
+                <!-- Sort Dropdown -->
+                <div class="flex items-center gap-2 shrink-0">
+                    <label for="sortSelect" class="text-xs font-bold text-gray-500 dark:text-gray-400 hidden sm:inline">
+                        <i class="fas fa-sort-amount-down mr-1"></i>Sắp xếp:
+                    </label>
+                    <select id="sortSelect" name="sort" onchange="document.getElementById('filterForm').submit();"
+                            class="px-3.5 py-2.5 text-xs font-semibold rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-night-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                        <option value="" selected="@(string.IsNullOrEmpty(currentSort))">Mặc định (Ưu tiên)</option>
+                        <option value="dong-gop" selected="@(currentSort == "dong-gop")">Đóng góp nhiều nhất (❤️)</option>
+                        <option value="gia-tang" selected="@(currentSort == "gia-tang")">Giá tăng dần</option>
+                        <option value="gia-giam" selected="@(currentSort == "gia-giam")">Giá giảm dần</option>
+                        <option value="moi-nhat" selected="@(currentSort == "moi-nhat")">Mới nhất</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Category Pills Navigation -->
+            <div class="flex items-center gap-2 pt-3 overflow-x-auto pb-1 scrollbar-none border-t border-gray-100 dark:border-white/10">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0 mr-1">
+                    <i class="fas fa-tags mr-1"></i>Danh mục:
+                </span>
+
+                <a href="@Url.Action("Index", "CuaHang", new { area = "CuaHang", q = currentSearch, sort = currentSort, danhMuc = "Tất cả" })"
+                   class="px-3.5 py-1.5 rounded-full text-xs font-bold transition shrink-0 @(currentCat == "Tất cả" ? "bg-emerald-600 text-white shadow-sm" : "bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/15")">
+                    Tất cả (@(ViewBag.TotalCount ?? Model?.Count() ?? 0))
+                </a>
+
+                @foreach (var cat in categories)
+                {
+                    bool isSelected = string.Equals(currentCat, cat, StringComparison.OrdinalIgnoreCase);
+                    <a href="@Url.Action("Index", "CuaHang", new { area = "CuaHang", q = currentSearch, sort = currentSort, danhMuc = cat })"
+                       class="px-3.5 py-1.5 rounded-full text-xs font-bold transition shrink-0 @(isSelected ? "bg-emerald-600 text-white shadow-sm" : "bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/15")">
+                        @cat
+                    </a>
+                }
+            </div>
+
+            <!-- Retain current category as hidden input for standard submit -->
+            <input type="hidden" name="danhMuc" value="@currentCat" />
+        </form>
+    </div>
+
+    <!-- PRODUCT GRID SECTION -->
+    <section>
+        @if (Model != null && Model.Any())
+        {
+            <!-- Multi-column Responsive Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                @foreach (var item in Model)
+                {
+                    <article class="group bg-white dark:bg-[#16261d] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden relative">
+
+                        <!-- Charity Badge Overlay -->
+                        <div class="absolute top-3 left-3 z-10 flex flex-col gap-1 items-start">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-rose-500/95 text-white backdrop-blur-md shadow-md">
+                                <i class="fas fa-heart text-white animate-pulse"></i>
+                                <span>❤️ @item.PhanTramDongGop% Quỹ đóng góp gây quỹ</span>
+                            </span>
+                        </div>
+
+                        <!-- Stock Status Badge Overlay -->
+                        <div class="absolute top-3 right-3 z-10">
+                            @if (item.ConHang)
+                            {
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600/90 text-white backdrop-blur-md shadow-sm">
+                                    Còn hàng (@item.SoLuongTon)
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-gray-700/90 text-white backdrop-blur-md shadow-sm">
+                                    Hết hàng
+                                </span>
+                            }
+                        </div>
+
+                        <!-- Product Thumbnail -->
+                        <a asp-area="CuaHang" asp-controller="CuaHang" asp-action="ChiTiet" asp-route-id="@item.IDSanPham"
+                           class="block aspect-square overflow-hidden bg-gray-50 dark:bg-night relative">
+                            <img src="@(string.IsNullOrEmpty(item.LinkHinhAnh) ? "/assets/default-product.jpg" : item.LinkHinhAnh)"
+                                 alt="@item.TenSanPham"
+                                 loading="lazy"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        </a>
+
+                        <!-- Product Content Info -->
+                        <div class="p-5 flex-1 flex flex-col justify-between space-y-3">
+                            <div class="space-y-1.5">
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                                    @item.DanhMuc
+                                </span>
+
+                                <h2 class="text-base font-bold text-gray-900 dark:text-white line-clamp-2 leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition">
+                                    <a asp-area="CuaHang" asp-controller="CuaHang" asp-action="ChiTiet" asp-route-id="@item.IDSanPham">
+                                        @item.TenSanPham
+                                    </a>
+                                </h2>
+
+                                @if (!string.IsNullOrEmpty(item.MoTaNgan))
+                                {
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                                        @item.MoTaNgan
+                                    </p>
+                                }
+                            </div>
+
+                            <!-- Human Charity Mission Snippet -->
+                            @if (!string.IsNullOrEmpty(item.ThongDiepGayQuy))
+                            {
+                                <div class="p-2.5 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-300 text-xs italic line-clamp-2">
+                                    <i class="fas fa-quote-left text-[10px] mr-1 opacity-70"></i>
+                                    @item.ThongDiepGayQuy
+                                </div>
+                            }
+
+                            <!-- Pricing Section -->
+                            <div class="pt-2 border-t border-gray-100 dark:border-white/10 flex items-baseline justify-between gap-2">
+                                <div>
+                                    <div class="text-lg font-black text-emerald-700 dark:text-emerald-400">
+                                        @item.GiaBan.ToString("N0") VNĐ
+                                    </div>
+                                    @if (item.GiaGoc.HasValue && item.GiaGoc > item.GiaBan)
+                                    {
+                                        <div class="text-xs text-gray-400 line-through">
+                                            @item.GiaGoc.Value.ToString("N0") VNĐ
+                                        </div>
+                                    }
+                                </div>
+                                <span class="text-[11px] font-bold text-gray-400">
+                                    Đã ủng hộ: @item.DaBan
+                                </span>
+                            </div>
+
+                            <!-- Card Action Buttons -->
+                            <div class="pt-2 flex items-center gap-2">
+                                <a asp-area="CuaHang" asp-controller="CuaHang" asp-action="ChiTiet" asp-route-id="@item.IDSanPham"
+                                   class="flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition">
+                                    Xem chi tiết
+                                </a>
+
+                                @if (item.ConHang)
+                                {
+                                    <form asp-area="CuaHang" asp-controller="GioHang" asp-action="ThemVaoGio" method="post" class="inline-block">
+                                        <input type="hidden" name="id" value="@item.IDSanPham" />
+                                        <input type="hidden" name="soLuong" value="1" />
+                                        <button type="submit" title="Thêm vào giỏ"
+                                                class="w-9 h-9 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center shadow-sm transition hover:scale-105 active:scale-95">
+                                            <i class="fas fa-cart-plus text-xs"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- Empty Filter State -->
+            <div class="text-center py-16 px-4 bg-white dark:bg-[#16261d] rounded-3xl border border-dashed border-gray-200 dark:border-white/10 space-y-4">
+                <div class="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center text-2xl">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Không tìm thấy sản phẩm gây quỹ</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+                    Không có sản phẩm nào phù hợp với từ khóa "@currentSearch" hoặc danh mục đang chọn. Hãy thử tìm kiếm với từ khóa khác hoặc xem tất cả sản phẩm.
+                </p>
+                <div class="pt-2">
+                    <a asp-area="CuaHang" asp-controller="CuaHang" asp-action="Index"
+                       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition">
+                        <i class="fas fa-redo-alt text-xs"></i>
+                        <span>Xem tất cả sản phẩm gây quỹ</span>
+                    </a>
+                </div>
+            </div>
+        }
+    </section>
+
+</div>

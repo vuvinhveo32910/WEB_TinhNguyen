@@ -1,0 +1,579 @@
+@model WEB_TinhNguyen.MoHinh.CauHinhBanToChuc
+@{
+    ViewData["Title"] = "Ban tổ chức";
+
+    var fontHeading = string.IsNullOrEmpty(Model?.FontTieuDe) ? "Be Vietnam Pro" : Model.FontTieuDe;
+    var fontBody = string.IsNullOrEmpty(Model?.FontNoiDung) ? "Be Vietnam Pro" : Model.FontNoiDung;
+    var lineColor = "#15803d";
+
+    var allMembers = Model?.ThanhViens?.OrderBy(t => t.ThuTu).ToList() ?? new List<WEB_TinhNguyen.MoHinh.ThanhVienBanToChuc>();
+
+    // =========================================================================
+    // PHÂN BỔ DỮ LIỆU VÀO 3 CẤP BẬC CỦA SƠ ĐỒ CÂY
+    // =========================================================================
+    // 1. CẤP 1 (Đứng đầu / Ban sáng lập): Lấy từ Tree_Root hoặc Founder_Top
+    var cap1List = allMembers.Where(m => m.NhomHienThi == "Tree_Root" || m.NhomHienThi == "Founder_Top").ToList();
+
+    // 2. CẤP 2 (Ban Thường trực / Sáng lập viên / Trưởng ban): Lấy từ Tree_Branch và Founder
+    var cap2List = allMembers.Where(m => m.NhomHienThi == "Tree_Branch" || m.NhomHienThi == "Founder").ToList();
+
+    // Nếu Admin chỉ nhập ở tab Ban Sáng Lập mà chưa nhập Tree_Root, tự động lấy người đầu tiên làm Cấp 1
+    if (!cap1List.Any() && cap2List.Any())
+    {
+        cap1List.Add(cap2List.First());
+        cap2List.RemoveAt(0);
+    }
+
+    // 3. CẤP 3 (Thành viên Ban Tổ Chức)
+    var cap3Members = allMembers.Where(m => m.NhomHienThi == "Member").ToList();
+    int initialShow = Model?.SoLuongHienThiBanDau > 0 ? Model.SoLuongHienThiBanDau : 12;
+
+    // Bảng màu bản sắc tình nguyện: Xanh lá đậm, Xanh dương, Vàng cam, Xanh tươi, Ngọc bích
+    string[] defaultPalette = new[] { "#15803d", "#0284c7", "#f59e0b", "#16a34a", "#22c55e", "#0d9488" };
+}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=@(fontHeading.Replace(" ", "+")):wght@600;700;800&family=@(fontBody.Replace(" ", "+")):wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    .org-page-wrapper {
+        font-family: '@Html.Raw(fontBody)', sans-serif;
+        --line-color: @lineColor;
+    }
+
+    .org-heading-font {
+        font-family: '@Html.Raw(fontHeading)', sans-serif;
+    }
+
+    /* =========================================================================
+           HỆ THỐNG ĐƯỜNG KẺ PHÂN CẤP SƠ ĐỒ TỔ CHỨC (GIỐNG ẢNH MẪU MTTQ)
+           ========================================================================= */
+    .org-line-v {
+        width: 2px;
+        background-color: var(--line-color);
+        margin: 0 auto;
+    }
+
+    @@media (min-width: 1024px) {
+        /* --- ĐƯỜNG KẺ NỐI CẤP 1 (KHI CÓ NHIỀU NGƯỜI CẤP 1 NGANG NHAU) --- */
+        .level1-multi-row {
+            position: relative;
+            padding-bottom: 32px;
+        }
+
+        .level1-multi-item {
+            position: relative;
+        }
+
+            .level1-multi-item::after {
+                content: '';
+                position: absolute;
+                bottom: -32px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 2px;
+                height: 32px;
+                background-color: var(--line-color);
+            }
+
+            .level1-multi-item:not(:first-child):not(:last-child)::before {
+                content: '';
+                position: absolute;
+                bottom: -32px;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background-color: var(--line-color);
+            }
+
+            .level1-multi-item:first-child:not(:only-child)::before {
+                content: '';
+                position: absolute;
+                bottom: -32px;
+                left: 50%;
+                right: 0;
+                height: 2px;
+                background-color: var(--line-color);
+            }
+
+            .level1-multi-item:last-child:not(:only-child)::before {
+                content: '';
+                position: absolute;
+                bottom: -32px;
+                left: 0;
+                right: 50%;
+                height: 2px;
+                background-color: var(--line-color);
+            }
+        /* --- ĐƯỜNG KẺ NHÁNH CẤP 2 (TỪ TRÊN TỎA XUỐNG & TỪ DƯỚI GOM XUỐNG CẤP 3) --- */
+        .level2-row {
+            position: relative;
+            padding-top: 40px;
+            padding-bottom: 40px;
+        }
+
+        .level2-col {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+            /* Nhánh trên: Đường dọc cắm xuống đỉnh avatar tròn của mỗi thẻ Cấp 2 */
+            .level2-col::before {
+                content: '';
+                position: absolute;
+                top: -40px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 2px;
+                height: 40px;
+                background-color: var(--line-color);
+                z-index: 1;
+            }
+            /* Nhánh trên: Thanh ngang nối tất cả các cột Cấp 2 với nhau */
+            .level2-col:not(:first-child):not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: -40px;
+                left: -12px;
+                right: -12px;
+                height: 2px;
+                background-color: var(--line-color);
+            }
+
+            .level2-col:first-child:not(:only-child)::after {
+                content: '';
+                position: absolute;
+                top: -40px;
+                left: 50%;
+                right: -12px;
+                height: 2px;
+                background-color: var(--line-color);
+            }
+
+            .level2-col:last-child:not(:only-child)::after {
+                content: '';
+                position: absolute;
+                top: -40px;
+                left: -12px;
+                right: 50%;
+                height: 2px;
+                background-color: var(--line-color);
+            }
+        /* Nhánh dưới (Đi từ đáy các thẻ Cấp 2 gom xuống Cấp 3 - Thành viên) */
+        .level2-bottom-connector {
+            position: absolute;
+            bottom: -40px;
+            left: 0;
+            right: 0;
+            height: 40px;
+            pointer-events: none;
+        }
+
+            .level2-bottom-connector::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 2px;
+                height: 40px;
+                background-color: var(--line-color);
+            }
+
+        .level2-col:not(:first-child):not(:last-child) .level2-bottom-connector::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -12px;
+            right: -12px;
+            height: 2px;
+            background-color: var(--line-color);
+        }
+
+        .level2-col:first-child:not(:only-child) .level2-bottom-connector::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            right: -12px;
+            height: 2px;
+            background-color: var(--line-color);
+        }
+
+        .level2-col:last-child:not(:only-child) .level2-bottom-connector::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -12px;
+            right: 50%;
+            height: 2px;
+            background-color: var(--line-color);
+        }
+        /* --- ĐƯỜNG KẺ NHÁNH CẤP 3 (TỎA XUỐNG KHUNG THÀNH VIÊN BTC) --- */
+        .level3-branch-header {
+            position: relative;
+            width: 75%;
+            margin: 0 auto;
+            height: 28px;
+            border-top: 2px solid var(--line-color);
+            border-left: 2px solid var(--line-color);
+            border-right: 2px solid var(--line-color);
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+            .level3-branch-header::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 2px;
+                height: 28px;
+                background-color: var(--line-color);
+            }
+    }
+</style>
+
+<main class="org-page-wrapper relative overflow-hidden pt-24 pb-16 bg-gradient-to-b from-emerald-50/60 via-white to-volunteer-50/40 dark:from-volunteer-night dark:via-volunteer-card dark:to-volunteer-night transition-colors duration-300">
+
+    <!-- SVGs Nền Trang trí nhẹ -->
+    <svg viewBox="0 0 320 220" class="pointer-events-none absolute -left-6 -top-6 z-10 h-48 w-64 opacity-75 md:h-64 md:w-80" aria-hidden="true">
+        <g fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round">
+            <path d="M10 10 C 80 40, 150 30, 240 80" opacity="0.5"></path>
+            <path d="M10 10 C 60 70, 120 90, 200 150" opacity="0.4"></path>
+        </g>
+        <ellipse cx="40" cy="22" rx="20" ry="9" fill="#22c55e" transform="rotate(25 40 22)" opacity="0.9"></ellipse>
+        <ellipse cx="78" cy="40" rx="22" ry="10" fill="#4ade80" transform="rotate(35 78 40)" opacity="0.85"></ellipse>
+        <ellipse cx="120" cy="34" rx="18" ry="8" fill="#16a34a" transform="rotate(20 120 34)" opacity="0.9"></ellipse>
+    </svg>
+
+    <div class="relative z-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+        <!-- ===================================================================== -->
+        <!-- PHẦN MỞ ĐẦU: TIÊU ĐỀ & ĐOẠN VĂN GIỚI THIỆU TỔ CHỨC (GIỐNG ẢNH MẪU)    -->
+        <!-- ===================================================================== -->
+        <div class="mx-auto max-w-4xl text-center mb-10">
+            @if (!string.IsNullOrEmpty(Model?.SoDo_Nhan))
+            {
+                <span class="mb-3 inline-block rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-5 py-1.5 text-xs font-bold uppercase tracking-[0.2em] shadow-xs border border-emerald-200 dark:border-emerald-800">
+                    @Model.SoDo_Nhan
+                </span>
+            }
+            <h1 class="org-heading-font text-3xl sm:text-5xl font-black tracking-tight mb-5 text-volunteer-text dark:text-white">
+                @(string.IsNullOrEmpty(Model?.SoDo_TieuDe) ? (Model?.SangLap_TieuDe ?? "Cơ Cấu Ban Tổ Chức") : Model.SoDo_TieuDe)
+            </h1>
+
+            @if (!string.IsNullOrEmpty(Model?.SoDo_DoanVanMoTa))
+            {
+                <p class="text-sm sm:text-[15.5px] leading-relaxed text-volunteer-text/80 dark:text-slate-300 text-justify sm:text-center max-w-4xl mx-auto font-medium">
+                    @Model.SoDo_DoanVanMoTa
+                </p>
+            }
+        </div>
+
+        <!-- ===================================================================== -->
+        <!-- SƠ ĐỒ CÂY PHÂN CẤP 3 TẦNG (CẤP 1 ➔ CẤP 2 ➔ CẤP 3)                     -->
+        <!-- ===================================================================== -->
+        <div class="w-full">
+
+            <!-- ----------------------------------------------------------------- -->
+            <!-- TẦNG 1 (CẤP 1): NGƯỜI ĐỨNG ĐẦU / TRƯỞNG BAN SÁNG LẬP              -->
+            <!-- ----------------------------------------------------------------- -->
+            @if (cap1List.Any())
+            {
+                if (cap1List.Count == 1)
+                {
+                    var root = cap1List[0];
+                    var rootColor = "#15803d";
+                    var rootSubInfo = !string.IsNullOrEmpty(root.ChucVuPhu) ? root.ChucVuPhu : root.MoTaChiTiet;
+
+                    <div class="flex flex-col items-center">
+                        <!-- Thẻ ngang Cấp 1 giống hệt ô "BÀ NGUYỄN ĐINH MINH PHƯƠNG" -->
+                        <div class="relative bg-white rounded-2xl px-6 py-6 sm:px-10 sm:py-7 shadow-md max-w-2xl w-full flex flex-col sm:flex-row items-center gap-6 transition duration-300 hover:shadow-xl"
+                             style="border: 1.8px solid @rootColor;">
+
+                            <!-- Ảnh tròn bên trái -->
+                            <div class="relative flex-shrink-0">
+                                <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-white p-1 shadow-md"
+                                     style="border: 2.5px solid @rootColor;">
+                                    <img src="@root.LinkAnh" alt="@root.HoTen" class="w-full h-full object-cover rounded-full" />
+                                </div>
+                                @if (!string.IsNullOrEmpty(root.LinkFacebook))
+                                {
+                                    <a href="@root.LinkFacebook" target="_blank" title="Facebook của @root.HoTen"
+                                       class="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-[#1877F2] text-white flex items-center justify-center shadow-md hover:scale-110 transition">
+                                        <svg class="h-4 w-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path></svg>
+                                    </a>
+                                }
+                            </div>
+
+                            <!-- Thông tin bên phải -->
+                            <div class="flex-1 text-center">
+                                <!-- Viên thuốc (Pill) nền màu đỏ/cam chứa Họ Tên IN HOA -->
+                                <div class="inline-block px-6 py-1.5 rounded-full text-white font-bold text-sm sm:text-base uppercase tracking-wide shadow-sm"
+                                     style="background-color: @rootColor;">
+                                    @root.HoTen
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(rootSubInfo))
+                                {
+                                    <p class="mt-2.5 text-xs sm:text-sm text-gray-600 font-medium leading-relaxed">
+                                        @rootSubInfo.Replace("|", " • ")
+                                    </p>
+                                }
+
+                                <h2 class="mt-2 text-lg sm:text-2xl font-extrabold uppercase tracking-wide"
+                                    style="color: @rootColor;">
+                                    @(string.IsNullOrEmpty(root.ChucVuChinh) ? "TRƯỞNG BAN TỔ CHỨC" : root.ChucVuChinh)
+                                </h2>
+
+                                @if (!string.IsNullOrEmpty(root.DonViCongTac))
+                                {
+                                    <p class="mt-1 text-xs sm:text-sm font-semibold text-gray-700">@root.DonViCongTac</p>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Đường kẻ dọc nối từ Cấp 1 xuống Cấp 2 -->
+                        @if (cap2List.Any() || cap3Members.Any())
+                        {
+                            <div class="org-line-v h-9 sm:h-11"></div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <!-- Trường hợp có nhiều người ở Cấp 1: Xếp NGANG NHAU và có đường kẻ gom xuống Cấp 2 -->
+                    <div class="level1-multi-row grid grid-cols-1 md:grid-cols-@Math.Min(cap1List.Count, 3) gap-6 justify-center max-w-5xl mx-auto">
+                        @for (int i = 0; i < cap1List.Count; i++)
+                        {
+                            var root = cap1List[i];
+                            var rootColor = defaultPalette[i % defaultPalette.Length];
+                            <div class="level1-multi-item flex">
+                                <div class="bg-white rounded-2xl p-5 shadow-md w-full flex items-center gap-4" style="border: 1.8px solid @rootColor;">
+                                    <img src="@root.LinkAnh" alt="@root.HoTen" class="w-20 h-20 rounded-full object-cover flex-shrink-0 p-0.5 bg-white" style="border: 2px solid @rootColor;" />
+                                    <div class="flex-1 text-center">
+                                        <span class="inline-block px-4 py-1 rounded-full text-white font-bold text-xs uppercase" style="background-color: @rootColor;">@root.HoTen</span>
+                                        <h3 class="mt-2 text-base font-extrabold uppercase" style="color: @rootColor;">@root.ChucVuChinh</h3>
+                                        <p class="text-xs text-gray-600 mt-0.5">@(root.DonViCongTac ?? root.ChucVuPhu)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    @if (cap2List.Any() || cap3Members.Any())
+                    {
+                        <div class="org-line-v h-9"></div>
+                    }
+                }
+            }
+
+            <!-- ----------------------------------------------------------------- -->
+            <!-- TẦNG 2 (CẤP 2): CÁC THẺ DỌC NGANG HÀNG NHAU (GIỐNG 4 Ô ẢNH MẪU)   -->
+            <!-- ----------------------------------------------------------------- -->
+            @if (cap2List.Any())
+            {
+                int colCount = Math.Min(cap2List.Count, 4);
+                <div class="level2-row grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-@colCount gap-x-6 gap-y-16">
+                    @for (int i = 0; i < cap2List.Count; i++)
+                    {
+                        var item = cap2List[i];
+                        // Phối bảng màu đa sắc giống ảnh mẫu
+                        var cardColor = defaultPalette[i % defaultPalette.Length];
+
+                        // Tách các gạch đầu dòng chức vụ ở giữa thẻ
+                        var rawBullets = !string.IsNullOrEmpty(item.ChucVuPhu) ? item.ChucVuPhu : item.MoTaChiTiet;
+                        var bullets = (rawBullets ?? "").Split(new[] { '|', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        // Tách chức danh chính ở đáy thẻ
+                        string mainRole = item.ChucVuChinh ?? "BAN TỔ CHỨC";
+                        string subUnit = item.DonViCongTac ?? "";
+                        if (string.IsNullOrEmpty(subUnit) && mainRole.Contains("|"))
+                        {
+                            var parts = mainRole.Split('|');
+                            mainRole = parts[0].Trim();
+                            subUnit = parts[1].Trim();
+                        }
+
+                        <div class="level2-col pt-11">
+                            <!-- Khung Card dọc viền màu -->
+                            <div class="relative bg-white rounded-2xl pt-14 pb-6 px-5 shadow-md flex-1 flex flex-col justify-between transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+                                 style="border: 1.8px solid @cardColor;">
+
+                                <!-- Avatar tròn đè lên chính giữa viền trên của Card -->
+                                <div class="absolute -top-11 left-1/2 -translate-x-1/2 z-10">
+                                    <div class="w-[88px] h-[88px] rounded-full overflow-hidden bg-white p-1 shadow-md"
+                                         style="border: 2px solid @cardColor;">
+                                        <img src="@item.LinkAnh" alt="@item.HoTen" class="w-full h-full object-cover rounded-full" />
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(item.LinkFacebook))
+                                    {
+                                        <a href="@item.LinkFacebook" target="_blank" title="Facebook của @item.HoTen"
+                                           class="absolute bottom-0 right-0 h-6 w-6 rounded-full bg-[#1877F2] text-white flex items-center justify-center shadow hover:scale-110 transition">
+                                            <svg class="h-3 w-3 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path></svg>
+                                        </a>
+                                    }
+                                </div>
+
+                                <!-- Phần trên: Khung tên bo tròn (Pill) & Danh sách gạch đầu dòng có icon người -->
+                                <div>
+                                    <div class="text-center mb-4">
+                                        <span class="inline-block px-4 py-1.5 rounded-full text-white font-bold text-xs sm:text-[13px] uppercase tracking-wide shadow-sm"
+                                              style="background-color: @cardColor;">
+                                            @item.HoTen
+                                        </span>
+                                    </div>
+
+                                    @if (bullets.Any())
+                                    {
+                                        <ul class="space-y-2.5 text-left text-xs sm:text-[13.5px] text-gray-700 my-4 px-1 leading-snug">
+                                            @foreach (var b in bullets)
+                                            {
+                                                <li class="flex items-start gap-2">
+                                                    <svg class="w-4 h-4 shrink-0 mt-0.5" style="color: @cardColor;" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                                    </svg>
+                                                    <span>@b.Trim()</span>
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                </div>
+
+                                <!-- Phần đáy: Chức danh TO IN ĐẬM & Đơn vị -->
+                                <div class="text-center pt-4 border-t border-gray-100 mt-4">
+                                    <h3 class="text-base sm:text-[17px] font-extrabold uppercase tracking-wide"
+                                        style="color: @cardColor;">
+                                        @mainRole
+                                    </h3>
+                                    @if (!string.IsNullOrEmpty(subUnit))
+                                    {
+                                        <p class="mt-1 text-xs sm:text-[13px] text-gray-600 font-medium">@subUnit</p>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Đường kẻ nối từ đáy thẻ Cấp 2 đi xuống Cấp 3 (Thành viên) -->
+                            @if (cap3Members.Any() && (Model == null || Model.HienThiDanhSachBTC))
+                            {
+                                <div class="level2-bottom-connector hidden lg:block"></div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- ----------------------------------------------------------------- -->
+            <!-- TẦNG 3 (CẤP 3): THÀNH VIÊN BAN TỔ CHỨC (CÓ ĐƯỜNG KẺ TỪ CẤP 2 XUỐNG)-->
+            <!-- ----------------------------------------------------------------- -->
+            @if (cap3Members.Any() && (Model == null || Model.HienThiDanhSachBTC))
+            {
+                <!-- Trục dọc trung tâm nối từ đường gom của Cấp 2 xuống Khối Thành viên Cấp 3 -->
+                <div class="flex flex-col items-center">
+                    <div class="org-line-v h-8 sm:h-10"></div>
+
+                    <!-- Bảng tiêu đề Cấp 3 nằm ngay trên trục đường kẻ -->
+                    <div class="relative z-10 bg-white px-7 py-2.5 rounded-full shadow-md border-2 text-center"
+                         style="border-color: @lineColor;">
+                        <span class="block text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                            @(Model?.BTC_Nhan ?? "Cấp thực thi & Điều phối")
+                        </span>
+                        <h2 class="org-heading-font text-lg sm:text-xl font-extrabold uppercase tracking-wide"
+                            style="color: @lineColor;">
+                            @(Model?.BTC_TieuDe ?? "Thành viên Ban Tổ Chức")
+                        </h2>
+                    </div>
+
+                    <!-- Nhánh chạc 3 tỏa xuống lưới Thành viên -->
+                    <div class="org-line-v h-5"></div>
+                    <div class="level3-branch-header hidden lg:block"></div>
+                </div>
+
+                <!-- Khung chứa các Thẻ Thành viên Cấp 3 -->
+                <div class="mt-4 lg:mt-0 bg-white/70 backdrop-blur-md rounded-3xl p-6 sm:p-8 shadow-sm"
+                     style="border: 1.5px solid @(lineColor)40;">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                        @for (int i = 0; i < cap3Members.Count; i++)
+                        {
+                            var mem = cap3Members[i];
+                            bool isHidden = i >= initialShow;
+                            var memColor = defaultPalette[i % defaultPalette.Length];
+
+                            <div class="btc-member-card @(isHidden ? "hidden" : "flex") flex-col justify-between bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition duration-300 hover:-translate-y-0.5"
+                                 style="border-top: 3px solid @memColor; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">
+                                <div class="flex items-center gap-3.5">
+                                    <div class="relative flex-shrink-0">
+                                        <img src="@mem.LinkAnh" alt="@mem.HoTen"
+                                             class="w-14 h-14 rounded-full object-cover p-0.5 bg-white shadow-sm"
+                                             style="border: 2px solid @memColor;" />
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <span class="inline-block px-2.5 py-0.5 rounded-full text-white font-bold text-[11px] uppercase tracking-tight truncate max-w-full"
+                                              style="background-color: @memColor;" title="@mem.HoTen">
+                                            @mem.HoTen
+                                        </span>
+                                        <p class="mt-1.5 text-xs font-extrabold uppercase tracking-tight" style="color: @memColor;">
+                                            @mem.ChucVuChinh
+                                        </p>
+                                        @if (!string.IsNullOrEmpty(mem.DonViCongTac))
+                                        {
+                                            <p class="text-[11px] text-gray-500 truncate">@mem.DonViCongTac</p>
+                                        }
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(mem.LinkFacebook))
+                                    {
+                                        <a href="@mem.LinkFacebook" target="_blank" title="Facebook của @mem.HoTen"
+                                           class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[#1877F2]/10 text-[#1877F2] hover:bg-[#1877F2] hover:text-white transition">
+                                            <svg class="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path></svg>
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    @if (cap3Members.Count > initialShow)
+                    {
+                        <div class="mt-8 text-center">
+                            <button type="button" id="btnShowMoreMembers" onclick="toggleMoreMembers()"
+                                    class="rounded-full bg-white px-7 py-2.5 text-xs sm:text-sm font-bold shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                                    style="color: @lineColor; border: 1.5px solid @lineColor;">
+                                Xem thêm @(cap3Members.Count - initialShow) thành viên khác ▼
+                            </button>
+                        </div>
+                    }
+                </div>
+            }
+
+        </div>
+
+        <!-- ===================================================================== -->
+        <!-- PHẦN CUỐI: CTA KÊU GỌI ĐĂNG KÝ TÌNH NGUYỆN VIÊN                        -->
+        <!-- ===================================================================== -->
+        <div class="mt-16 pt-10 border-t border-gray-200/80 text-center">
+            <p class="mb-5 text-base font-medium text-gray-700">
+                @(Model?.CTA_MoTa ?? "Muốn trở thành một phần của đội ngũ mùa 2026?")
+            </p>
+            <a href="@(Model?.CTA_LinkNut ?? "/#register")"
+               class="inline-block rounded-full px-8 py-3.5 font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:brightness-110"
+               style="background: linear-gradient(to right, #2e7d32, #7cc34a);">
+                @(Model?.CTA_TextNut ?? "Đăng ký làm tình nguyện viên")
+            </a>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    function toggleMoreMembers() {
+        const hiddenCards = document.querySelectorAll('.btc-member-card.hidden');
+        hiddenCards.forEach(c => {
+            c.classList.remove('hidden');
+            c.classList.add('flex');
+        });
+        const btn = document.getElementById('btnShowMoreMembers');
+        if (btn) btn.style.display = 'none';
+    }
+</script>

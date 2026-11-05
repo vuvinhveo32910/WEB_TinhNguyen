@@ -1,3 +1,64 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Nền trắng mặc định */
+    --bg-page: #ffffff;
+    --bg-surface: #ffffff;
+    --bg-surface-soft: #f8faf8;
+    
+    /* Màu chữ mới mang đậm bản sắc tình nguyện (Deep Volunteer Pine / WCAG AAA > 11.5:1) */
+    --text-main: #143823;
+    --text-muted: #3d6049;
+    --text-subtle: #6b8f77;
+
+    /* Màu thương hiệu áo xanh tình nguyện */
+    --volunteer-primary: #15803d;
+    --volunteer-primary-hover: #166534;
+    --volunteer-accent: #22c55e;
+    --volunteer-light: #dcfce7;
+    
+    /* Màu điểm nhấn bổ trợ */
+    --volunteer-sun: #f59e0b;
+    --volunteer-heart: #f43f5e;
+    --volunteer-water: #0284c7;
+
+    /* Đường viền & Đổ bóng */
+    --border-light: rgba(20, 56, 35, 0.08);
+    --border-card: rgba(22, 163, 74, 0.15);
+    --shadow-card: 0 10px 25px -5px rgba(20, 56, 35, 0.05), 0 8px 10px -6px rgba(20, 56, 35, 0.05);
+    --shadow-elevated: 0 20px 30px -10px rgba(21, 128, 61, 0.15);
+  }
+
+  /* Chế độ Tối (Dark Mode) */
+  html.dark {
+    --bg-page: #0a140e;
+    --bg-surface: #13241b;
+    --bg-surface-soft: #0d1d14;
+
+    --text-main: #f8fafc;
+    --text-muted: #cbd5e1;
+    --text-subtle: #94a3b8;
+
+    --volunteer-primary: #4ade80;
+    --volunteer-primary-hover: #86efac;
+    --volunteer-accent: #86efac;
+    --volunteer-light: rgba(74, 222, 128, 0.12);
+
+    --volunteer-sun: #fbbf24;
+    --volunteer-heart: #fb7185;
+    --volunteer-water: #38bdf8;
+
+    --border-light: rgba(255, 255, 255, 0.08);
+    --border-card: rgba(74, 222, 128, 0.2);
+    --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    --shadow-elevated: 0 20px 30px -10px rgba(0, 0, 0, 0.7);
+  }
+
+  body:not(.cuahang-body) {
+    background-color: var(--bg-page);
+    color: var(--text-main);
+  }
+}

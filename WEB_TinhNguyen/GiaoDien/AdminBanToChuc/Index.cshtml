@@ -1,0 +1,70 @@
+@model IEnumerable<WEB_TinhNguyen.MoHinh.ChienDich>
+@{
+    ViewData["Title"] = "Quản lý Ban Tổ Chức";
+    Layout = "~/GiaoDien/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-7xl mx-auto my-8 px-4 sm:px-6 lg:px-8">
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">Quản lý Trang Ban Tổ Chức & Sơ Đồ Cơ Cấu</h2>
+            <p class="mt-1 text-sm text-gray-500">Thiết lập Ban sáng lập, Sơ đồ cây Ban Thường trực và danh sách Thành viên theo từng năm chiến dịch.</p>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="mb-6 flex items-center p-4 text-sm text-emerald-800 border border-emerald-200 rounded-xl bg-emerald-50 shadow-sm">
+            <svg class="flex-shrink-0 inline w-5 h-5 mr-3 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            <div><span class="font-bold">Thành công!</span> @TempData["Success"]</div>
+        </div>
+    }
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="py-4 px-6 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Năm</th>
+                        <th class="py-4 px-6 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tên chiến dịch</th>
+                        <th class="py-4 px-6 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                        <th class="py-4 px-6 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 bg-white">
+                    @foreach (var item in Model)
+                    {
+                        <tr class="hover:bg-gray-50/80 transition">
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                <span class="px-3 py-1 rounded-md bg-emerald-50 text-emerald-700 font-bold text-sm">@item.Nam</span>
+                            </td>
+                            <td class="py-4 px-6 text-sm font-medium text-gray-800">@item.TieuDe</td>
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                @if (item.TrangThaiHoatDong)
+                                {
+                                    <span class="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Đang hoạt động
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">
+                                        <span class="w-2 h-2 rounded-full bg-gray-400"></span> Đã đóng
+                                    </span>
+                                }
+                            </td>
+                            <td class="py-4 px-6 whitespace-nowrap text-center">
+                                <a href="@Url.Action("Edit", "AdminBanToChuc", new { id = item.IDChienDich })"
+                                   class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-emerald-700 bg-emerald-50 rounded-lg hover:bg-emerald-600 hover:text-white transition">
+                                    👥 Cấu hình Ban Tổ Chức
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

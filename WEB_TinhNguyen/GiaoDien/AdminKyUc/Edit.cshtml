@@ -1,0 +1,200 @@
+@model WEB_TinhNguyen.MoHinh.CauHinhKyUcVM
+@{
+    ViewData["Title"] = "Cấu hình Ký ức - " + Model.NamChienDich;
+    Layout = "~/GiaoDien/Shared/_AdminLayout.cshtml";
+}
+
+<div class="p-6 bg-gray-50 min-h-screen">
+    <div class="mb-6 flex justify-between items-center">
+        <h2 class="text-2xl font-bold text-gray-800">Cấu hình Ký ức - Mùa @Model.NamChienDich</h2>
+        <a href="@Url.Action("Index", "AdminKyUc")" class="text-gray-600 hover:text-gray-900 font-medium">⬅ Quay lại danh sách</a>
+    </div>
+
+    <form asp-action="Edit" enctype="multipart/form-data" method="post" class="space-y-6">
+        <input type="hidden" asp-for="IDCauHinhKyUc" />
+        <input type="hidden" asp-for="IDChienDich" />
+        <input type="hidden" asp-for="LinkAnhBiaCu" />
+
+        <!-- 1. CẤU HÌNH GIAO DIỆN CHUNG (MÀU SẮC & FONT) -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="text-lg font-bold text-indigo-700 mb-4 border-b pb-2">🎨 Cấu hình Giao diện (CSS)</h3>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Font Tiêu đề (Google Fonts)</label>
+                <input type="text" asp-for="FontTieuDe" placeholder="Ví dụ: Dancing Script" class="w-full border p-2 rounded text-sm" />
+            </div>
+        </div>
+
+        <!-- 2. THÔNG TIN HERO SECTION & BÀI TỔNG KẾT -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="text-lg font-bold text-indigo-700 mb-4 border-b pb-2">📝 Nội dung Tổng kết</h3>
+            <div class="grid grid-cols-1 gap-6">
+                <!-- Group: Banner -->
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h4 class="font-bold text-gray-700 mb-3 uppercase text-xs tracking-wider">Phần Banner (Hero Section)</h4>
+                    <div class="grid gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tiêu đề chính</label>
+                            <input type="text" asp-for="TieuDeChinh" class="w-full border p-2 rounded" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Mô tả ngắn</label>
+                            <textarea asp-for="DoanVanMoTa" rows="2" class="w-full border p-2 rounded"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Ảnh bìa (Hero Image)</label>
+                            <input type="file" asp-for="FileAnhBia" class="w-full border p-2 rounded bg-white" accept="image/*" />
+                            @if (!string.IsNullOrEmpty(Model.LinkAnhBiaCu))
+                            {
+                                <img src="@Model.LinkAnhBiaCu" class="mt-2 h-32 object-cover rounded shadow" />
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Group: Bài Tổng kết -->
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h4 class="font-bold text-gray-700 mb-3 uppercase text-xs tracking-wider">Phần Bài Viết Tổng Kết</h4>
+                    <div class="grid gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tiêu đề Bài Tổng Kết (VD: Trăng Sáng Langbiang 2026)</label>
+                            <input type="text" asp-for="TieuDeTongKet" class="w-full border p-2 rounded" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Font Tiêu đề (Google Fonts)</label>
+                            <input type="text" asp-for="FontTieuDeTongKet" placeholder="VD: Be Vietnam Pro, Arial..." class="w-full border p-2 rounded text-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Mã HTML Bài Tổng Kết
+                                <span class="text-xs text-gray-500 font-normal">(Admin có thể chèn các thẻ &lt;p&gt;, &lt;strong&gt;, &lt;br&gt;)</span>
+                            </label>
+                            <textarea asp-for="NoiDungTongKetHtml" rows="6" class="w-full border p-2 rounded font-mono text-sm bg-white"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 3. QUẢN LÝ THƯ VIỆN ẢNH (GALLERY) -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="text-lg font-bold text-indigo-700">📸 Quản lý Thư viện ảnh (Khoảnh khắc)</h3>
+                <button type="button" onclick="addGalleryRow()" class="bg-indigo-600 text-white px-4 py-2 rounded text-sm hover:bg-indigo-700">➕ Thêm Ảnh</button>
+            </div>
+
+            <table class="w-full text-left border-collapse" id="galleryTable">
+                <thead>
+                    <tr class="bg-gray-100 text-sm">
+                        <th class="p-2 border">Hình ảnh hiện tại</th>
+                        <th class="p-2 border">Upload Ảnh mới</th>
+                        <th class="p-2 border">Tiêu đề ảnh (Caption)</th>
+                        <th class="p-2 border text-center">Ảnh dọc (Tall)</th>
+                        <th class="p-2 border text-center">Xóa</th>
+                    </tr>
+                </thead>
+                <tbody id="galleryBody">
+                    @for (int i = 0; i < Model.ThuVienAnhs.Count; i++)
+                    {
+                        <tr class="border-b" id="galRow_@i">
+                            <td class="p-2 border text-center">
+                                <input type="hidden" name="ThuVienAnhs[@i].LinkAnhCu" value="@Model.ThuVienAnhs[i].LinkAnhCu" />
+                                <img src="@Model.ThuVienAnhs[i].LinkAnhCu" class="h-16 w-16 object-cover rounded mx-auto" />
+                            </td>
+                            <td class="p-2 border"><input type="file" name="ThuVienAnhs[@i].FileAnh" accept="image/*" class="text-sm w-full" /></td>
+                            <td class="p-2 border"><input type="text" name="ThuVienAnhs[@i].TieuDeAnh" value="@Model.ThuVienAnhs[i].TieuDeAnh" class="w-full border p-1 rounded" /></td>
+                            <td class="p-2 border text-center">
+                                <!-- MVC Checkbox binding cần value="true" -->
+                                <input type="checkbox" name="ThuVienAnhs[@i].LaAnhDoc" value="true" @(Model.ThuVienAnhs[i].LaAnhDoc ? "checked" : "") class="h-5 w-5" />
+                            </td>
+                            <td class="p-2 border text-center"><button type="button" onclick="removeRow('galRow_@i')" class="text-red-500 font-bold hover:bg-red-50 p-1 rounded">X</button></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 4. QUẢN LÝ NHÀ TÀI TRỢ -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="text-lg font-bold text-indigo-700">🤝 Đơn vị Đồng Hành & Tài Trợ</h3>
+                <button type="button" onclick="addSponsorRow()" class="bg-indigo-600 text-white px-4 py-2 rounded text-sm hover:bg-indigo-700">➕ Thêm Đơn vị</button>
+            </div>
+
+            <table class="w-full text-left border-collapse" id="sponsorTable">
+                <thead>
+                    <tr class="bg-gray-100 text-sm">
+                        <th class="p-2 border">Logo hiện tại</th>
+                        <th class="p-2 border">Upload Logo mới</th>
+                        <th class="p-2 border">Tên Đơn vị</th>
+                        <th class="p-2 border">Phân loại (VD: Nhà tài trợ)</th>
+                        <th class="p-2 border text-center">Xóa</th>
+                    </tr>
+                </thead>
+                <tbody id="sponsorBody">
+                    @for (int i = 0; i < Model.NhaTaiTros.Count; i++)
+                    {
+                        <tr class="border-b" id="sponRow_@i">
+                            <td class="p-2 border text-center">
+                                <input type="hidden" name="NhaTaiTros[@i].LinkLogoCu" value="@Model.NhaTaiTros[i].LinkLogoCu" />
+                                <img src="@Model.NhaTaiTros[i].LinkLogoCu" class="h-16 w-auto object-contain mx-auto" />
+                            </td>
+                            <td class="p-2 border"><input type="file" name="NhaTaiTros[@i].FileLogo" accept="image/*" class="text-sm w-full" /></td>
+                            <td class="p-2 border"><input type="text" name="NhaTaiTros[@i].TenDonVi" value="@Model.NhaTaiTros[i].TenDonVi" class="w-full border p-1 rounded" /></td>
+                            <td class="p-2 border"><input type="text" name="NhaTaiTros[@i].PhanLoai" value="@Model.NhaTaiTros[i].PhanLoai" class="w-full border p-1 rounded" placeholder="Nhà tài trợ chính..." /></td>
+                            <td class="p-2 border text-center"><button type="button" onclick="removeRow('sponRow_@i')" class="text-red-500 font-bold hover:bg-red-50 p-1 rounded">X</button></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="fixed bottom-0 right-0 left-64 bg-white border-t p-4 flex justify-end shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50">
+            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105">
+                💾 LƯU CẤU HÌNH KÝ ỨC
+            </button>
+        </div>
+        <div class="h-20"></div> <!-- Spacer cho nút Fixed -->
+    </form>
+</div>
+
+<!-- SCRIPTS ĐỂ XỬ LÝ THÊM ROW ĐỘNG (JAVASCRIPT) -->
+<script>
+    let galIndex = @Model.ThuVienAnhs.Count;
+    function addGalleryRow() {
+        const tbody = document.getElementById('galleryBody');
+        const row = document.createElement('tr');
+        row.id = 'galRow_' + galIndex;
+        row.className = 'border-b bg-yellow-50'; // Đổi màu để dễ nhận biết dòng mới
+        row.innerHTML = `
+            <td class="p-2 border text-center text-xs text-gray-400">Chưa có ảnh</td>
+            <td class="p-2 border"><input type="file" name="ThuVienAnhs[${galIndex}].FileAnh" accept="image/*" class="text-sm w-full" required /></td>
+            <td class="p-2 border"><input type="text" name="ThuVienAnhs[${galIndex}].TieuDeAnh" class="w-full border p-1 rounded" placeholder="Tiêu đề ảnh..." /></td>
+            <td class="p-2 border text-center"><input type="checkbox" name="ThuVienAnhs[${galIndex}].LaAnhDoc" value="true" class="h-5 w-5" /></td>
+            <td class="p-2 border text-center"><button type="button" onclick="removeRow('galRow_${galIndex}')" class="text-red-500 font-bold hover:bg-red-50 p-1 rounded">X</button></td>
+        `;
+        tbody.appendChild(row);
+        galIndex++;
+    }
+
+    let sponIndex = @Model.NhaTaiTros.Count;
+    function addSponsorRow() {
+        const tbody = document.getElementById('sponsorBody');
+        const row = document.createElement('tr');
+        row.id = 'sponRow_' + sponIndex;
+        row.className = 'border-b bg-yellow-50';
+        row.innerHTML = `
+            <td class="p-2 border text-center text-xs text-gray-400">Chưa có logo</td>
+            <td class="p-2 border"><input type="file" name="NhaTaiTros[${sponIndex}].FileLogo" accept="image/*" class="text-sm w-full" required /></td>
+            <td class="p-2 border"><input type="text" name="NhaTaiTros[${sponIndex}].TenDonVi" class="w-full border p-1 rounded" placeholder="Tên công ty/đơn vị..." required /></td>
+            <td class="p-2 border"><input type="text" name="NhaTaiTros[${sponIndex}].PhanLoai" class="w-full border p-1 rounded" placeholder="Ví dụ: Đơn vị tài trợ..." required /></td>
+            <td class="p-2 border text-center"><button type="button" onclick="removeRow('sponRow_${sponIndex}')" class="text-red-500 font-bold hover:bg-red-50 p-1 rounded">X</button></td>
+        `;
+        tbody.appendChild(row);
+        sponIndex++;
+    }
+
+    function removeRow(rowId) {
+        if(confirm("Bạn có chắc chắn muốn xóa dòng này không?")) {
+            document.getElementById(rowId).remove();
+        }
+    }
+</script>

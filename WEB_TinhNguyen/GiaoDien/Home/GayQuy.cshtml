@@ -1,0 +1,310 @@
+@model WEB_TinhNguyen.MoHinh.CauHinhGayQuy
+@{
+    ViewData["Title"] = "Gây quỹ & Đồng hành";
+    var fontHeading = string.IsNullOrEmpty(Model?.FontTieuDe) ? "Be Vietnam Pro" : Model.FontTieuDe;
+    var fontBody = string.IsNullOrEmpty(Model?.FontNoiDung) ? "Be Vietnam Pro" : Model.FontNoiDung;
+}
+
+<!-- Tự động nhúng Google Fonts theo cấu hình của Admin -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=@(fontHeading.Replace(" ", "+")):wght@400;600;700;800&family=@(fontBody.Replace(" ", "+")):wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    .gayquy-wrapper {
+        font-family: '@Html.Raw(fontBody)', sans-serif;
+    }
+    .gayquy-heading {
+        font-family: '@Html.Raw(fontHeading)', sans-serif;
+    }
+</style>
+
+<div class="w-full gayquy-wrapper">
+    <!-- SECTION 1: HERO GÂY QUỸ HIỆN ĐẠI -->
+    <section class="relative overflow-hidden pt-28 pb-16 sm:pt-36 lg:pt-40 lg:pb-24 min-h-[calc(100vh-5rem)] xl:min-h-0 flex items-center bg-gradient-to-b from-emerald-50/70 via-white to-volunteer-50/40 dark:from-volunteer-night dark:via-volunteer-card dark:to-volunteer-night transition-colors duration-300">
+        <!-- SVG Trang trí -->
+        <svg viewBox="0 0 320 220" class="pointer-events-none absolute -left-6 -top-6 z-10 h-56 w-72 opacity-90 md:h-72 md:w-96" aria-hidden="true">
+            <g fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round">
+                <path d="M10 10 C 80 40, 150 30, 240 80" opacity="0.6"></path>
+                <path d="M10 10 C 60 70, 120 90, 200 150" opacity="0.5"></path>
+            </g>
+            <ellipse cx="40" cy="22" rx="20" ry="9" fill="#22c55e" transform="rotate(25 40 22)" opacity="0.95"></ellipse>
+            <ellipse cx="78" cy="40" rx="22" ry="10" fill="#4ade80" transform="rotate(35 78 40)" opacity="0.9"></ellipse>
+            <ellipse cx="120" cy="34" rx="18" ry="8" fill="#16a34a" transform="rotate(20 120 34)" opacity="0.95"></ellipse>
+            <ellipse cx="165" cy="58" rx="24" ry="11" fill="#22c55e" transform="rotate(40 165 58)" opacity="0.9"></ellipse>
+            <ellipse cx="210" cy="82" rx="20" ry="9" fill="#4ade80" transform="rotate(30 210 82)" opacity="0.92"></ellipse>
+            <ellipse cx="60" cy="78" rx="18" ry="8" fill="#16a34a" transform="rotate(55 60 78)" opacity="0.85"></ellipse>
+            <ellipse cx="110" cy="100" rx="22" ry="10" fill="#22c55e" transform="rotate(60 110 100)" opacity="0.9"></ellipse>
+            <ellipse cx="160" cy="128" rx="20" ry="9" fill="#4ade80" transform="rotate(65 160 128)" opacity="0.88"></ellipse>
+            <ellipse cx="200" cy="150" rx="17" ry="8" fill="#16a34a" transform="rotate(70 200 150)" opacity="0.85"></ellipse>
+        </svg>
+        <svg width="34" height="34" viewBox="0 0 40 40" class="pointer-events-none absolute bottom-8 right-6 z-10 h-16 w-16 opacity-80 md:h-24 md:w-24" aria-hidden="true">
+            <ellipse cx="20" cy="8" rx="4.2" ry="9" fill="#ffffff" transform="rotate(0 20 20)"></ellipse>
+            <ellipse cx="20" cy="8" rx="4.2" ry="9" fill="#ffffff" transform="rotate(45 20 20)"></ellipse>
+            <ellipse cx="20" cy="8" rx="4.2" ry="9" fill="#ffffff" transform="rotate(90 20 20)"></ellipse>
+            <ellipse cx="20" cy="8" rx="4.2" ry="9" fill="#ffffff" transform="rotate(135 20 20)"></ellipse>
+            <ellipse cx="20" cy="8" rx="4.2" ry="9" fill="#ffffff" transform="rotate(180 20 20)"></ellipse>
+            <ellipse cx="20" cy="8" rx="4.2" ry="9" fill="#ffffff" transform="rotate(225 20 20)"></ellipse>
+            <ellipse cx="20" cy="8" rx="4.2" ry="9" fill="#ffffff" transform="rotate(270 20 20)"></ellipse>
+            <ellipse cx="20" cy="8" rx="4.2" ry="9" fill="#ffffff" transform="rotate(315 20 20)"></ellipse>
+            <circle cx="20" cy="20" r="5.5" fill="#f59e0b"></circle>
+        </svg>
+
+        <div class="relative z-10 mx-auto max-w-7xl px-6 w-full">
+            <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+                <div class="flex flex-col items-start text-left animate-fade-in-up">
+                    <div class="inline-flex items-center gap-2 rounded-full px-4 py-2 bg-emerald-100/90 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 backdrop-blur-md shadow-xs">
+                        <span class="h-2 w-2 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse"></span>
+                        <span class="text-xs font-bold uppercase tracking-wider">
+                            @(Model?.Hero_Nhan ?? "KHÔNG GIAN YÊU THƯƠNG")
+                        </span>
+                    </div>
+
+                    <div class="mt-6">
+                        <h1 class="gayquy-heading font-extrabold tracking-tight leading-tight text-volunteer-text dark:text-white"
+                            style="font-size: @(Model?.Hero_CoChuTieuDe ?? "48px");">
+                            @(Model?.Hero_TieuDe ?? "HÌNH THỨC TRAO GỬI YÊU THƯƠNG")
+                        </h1>
+                    </div>
+
+                    <div class="mt-6">
+                        <p class="max-w-xl text-lg leading-relaxed text-volunteer-text/80 dark:text-slate-300 font-medium">
+                            @(Model?.Hero_MoTa ?? "Có nhiều cách để bạn kề vai, sát cánh cùng dự án. Mọi sự ủng hộ thông qua các \"Gói yêu thương\", hiện kim, nhu yếu phẩm hay chỉ một lời chúc tốt đẹp đều là những mảnh ghép làm nên một mùa Trung thu diệu kỳ!")
+                        </p>
+                    </div>
+
+                    <div class="mt-8 flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                        <a href="@(Model?.Hero_LinkNut ?? "#ways-to-contribute")"
+                           class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full px-8 py-4 font-bold text-white shadow-md hover:shadow-xl transition-all transform hover:-translate-y-0.5 text-base bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-700">
+                            <i class="fas fa-heart text-rose-400 animate-heartbeat"></i>
+                            <span>@(Model?.Hero_TextNut ?? "Đóng góp ngay")</span>
+                        </a>
+                        <a href="/CuaHang"
+                           class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full px-7 py-4 font-bold text-emerald-800 dark:text-emerald-300 bg-white dark:bg-white/10 border border-emerald-300 dark:border-white/20 shadow-xs hover:bg-emerald-50 transition-all text-base">
+                            <i class="fas fa-store text-emerald-600 dark:text-emerald-400"></i>
+                            <span>Cửa hàng gây quỹ</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="relative w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 transition duration-500 hover:scale-[1.02]">
+                    <img alt="@Model?.Hero_TieuDe" src="@(string.IsNullOrEmpty(Model?.Hero_LinkAnh) ? "/gallery/2025/bro02087.jpg" : Model.Hero_LinkAnh)" class="object-cover w-full h-full" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: CÁCH THỨC ĐÓNG GÓP (CARDS TRỰC QUAN & TINH TẾ) -->
+    <section id="ways-to-contribute" class="py-20 sm:py-28 relative z-20 max-w-7xl mx-auto px-6 w-full">
+        <div class="mx-auto max-w-2xl text-center mb-12 sm:mb-16">
+            <span class="mb-4 sm:mb-6 inline-block rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-5 py-2 text-xs font-bold uppercase tracking-widest border border-emerald-200 dark:border-emerald-800">
+                @(Model?.DongGop_Nhan ?? "Kênh ủng hộ")
+            </span>
+            <h2 class="gayquy-heading text-3xl font-black leading-tight sm:text-4xl md:text-5xl text-volunteer-text dark:text-white">
+                @(Model?.DongGop_TieuDe ?? "Cách thức đóng góp")
+            </h2>
+            <p class="mt-4 text-base sm:text-lg text-volunteer-text/75 dark:text-slate-300 font-medium">
+                @(Model?.DongGop_MoTa ?? "Cùng chung tay lan tỏa yêu thương bằng phương thức phù hợp nhất với bạn.")
+            </p>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-8 mx-auto">
+            @if (Model?.KenhDongGops != null && Model.KenhDongGops.Any())
+            {
+                foreach (var kenh in Model.KenhDongGops.OrderBy(k => k.ThuTu))
+                {
+                    <article class="flex flex-col border border-emerald-100 dark:border-white/10 rounded-3xl p-7 gap-5 shadow-sm hover:shadow-xl transition-all duration-300 w-full max-w-[360px] bg-white dark:bg-volunteer-card transform hover:-translate-y-1">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shadow-xs">
+                            @if (kenh.LoaiIcon == "gift")
+                            {
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            }
+                            else if (kenh.LoaiIcon == "heart")
+                            {
+                                <svg class="w-7 h-7 text-rose-500 animate-pulse-slow" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                            }
+                            else
+                            {
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            }
+                        </div>
+
+                        <div class="flex flex-col gap-2 flex-1">
+                            <h3 class="gayquy-heading text-xl font-bold text-volunteer-text dark:text-white">@kenh.TenKenh</h3>
+                            <p class="text-sm leading-relaxed text-volunteer-text/75 dark:text-slate-300">@kenh.MoTa</p>
+                        </div>
+
+                        @if (kenh.LoaiHanhDong == "qr")
+                        {
+                            <button type="button"
+                                    onclick="openQrModal('@Html.Raw(kenh.TenKenh)', '@Html.Raw(kenh.LinkAnhQR)', '@Html.Raw(kenh.TenNganHang)', '@Html.Raw(kenh.SoTaiKhoan)', '@Html.Raw(kenh.TenChuTaiKhoan)', '@Html.Raw(kenh.NoiDungChuyenKhoan)')"
+                                    class="inline-flex items-center justify-center gap-2 text-white font-bold text-sm px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 shadow-md hover:shadow-lg transition-all w-full mt-auto cursor-pointer">
+                                <i class="fas fa-qrcode"></i>
+                                <span>@kenh.TextNut</span>
+                            </button>
+                        }
+                        else
+                        {
+                            <a href="@kenh.LinkNgoai" target="_blank" rel="noopener noreferrer"
+                               class="inline-flex items-center justify-center gap-2 font-bold text-sm px-5 py-3 rounded-2xl text-white bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 shadow-md hover:shadow-lg transition-all w-full mt-auto cursor-pointer">
+                                <i class="fas fa-external-link-alt text-xs"></i>
+                                <span>@kenh.TextNut</span>
+                            </a>
+                        }
+                    </article>
+                }
+            }
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model?.DongGop_GhiChuChanTrang))
+        {
+            <div class="mt-12 text-center">
+                <p class="text-sm text-volunteer-text/60 dark:text-slate-400 font-medium">@Model.DongGop_GhiChuChanTrang</p>
+            </div>
+        }
+    </section>
+
+    <!-- SECTION 3: BÁO CÁO THU CHI MINH BẠCH -->
+    <section id="bao-cao-chi" class="py-16 sm:py-24 bg-emerald-50/60 dark:bg-volunteer-night border-y border-emerald-100 dark:border-white/10 transition-colors duration-300">
+        <div class="mx-auto max-w-2xl px-5 text-center sm:px-6">
+            <span class="mb-3 inline-block rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-4 py-1.5 text-xs font-bold uppercase tracking-widest border border-emerald-200 dark:border-emerald-800">
+                @(Model?.BaoCao_Nhan ?? "Minh bạch")
+            </span>
+            <h2 class="gayquy-heading whitespace-pre-line text-3xl font-black leading-tight sm:text-4xl md:text-5xl text-volunteer-text dark:text-white">
+                @(Model?.BaoCao_TieuDe ?? "Báo cáo thu – chi")
+            </h2>
+            <p class="mt-4 text-base sm:text-lg text-volunteer-text/75 dark:text-slate-300 font-medium">
+                @(Model?.BaoCao_MoTa ?? "Toàn bộ khoản thu – chi được cập nhật công khai trên các kênh thông tin của Dự án.")
+            </p>
+            @if (!string.IsNullOrEmpty(Model?.BaoCao_LinkNut))
+            {
+                <a href="@Model.BaoCao_LinkNut" target="_blank" rel="noopener noreferrer"
+                   class="mt-7 inline-flex items-center gap-2.5 rounded-full px-8 py-3.5 text-sm font-bold text-white shadow-md hover:shadow-xl transition-all transform hover:-translate-y-0.5 bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800">
+                    <span>@(Model?.BaoCao_TextNut ?? "Xem báo cáo chi tiết")</span>
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </a>
+            }
+        </div>
+    </section>
+
+    <!-- SECTION 4: ĐƠN VỊ TÀI TRỢ -->
+    <section class="relative overflow-x-hidden py-16 sm:py-24 bg-white dark:bg-volunteer-night transition-colors duration-300">
+        <span id="sponsors" aria-hidden="true" class="block"></span>
+        <div class="mx-auto max-w-7xl px-5 sm:px-6">
+            <div class="mx-auto max-w-3xl text-center">
+                <span class="mb-4 sm:mb-6 inline-block rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 px-5 py-2 text-xs font-bold uppercase tracking-widest border border-amber-200 dark:border-amber-800">
+                    @(Model?.TaiTro_Nhan ?? "Những mảnh ghép tạo nên Trăng sáng Langbiang")
+                </span>
+                <h2 class="gayquy-heading whitespace-pre-line text-3xl font-black leading-tight sm:text-4xl md:text-5xl text-volunteer-text dark:text-white">
+                    @(Model?.TaiTro_TieuDe ?? "ĐƠN VỊ TỔ CHỨC - TÀI TRỢ")
+                    <span class="inline-block text-amber-600 dark:text-amber-400">@(Model?.TaiTro_TieuDeNoiBat ?? "NĂM 2026")</span>
+                </h2>
+                <p class="mt-4 text-base text-volunteer-text/75 dark:text-slate-300 sm:text-lg font-medium">
+                    @(Model?.TaiTro_MoTa ?? "Mỗi đơn vị là một mảnh ghép quan trọng, cùng nhau thắp sáng và làm nên một mùa trăng thật trọn vẹn!")
+                </p>
+            </div>
+
+            <div class="mt-12 space-y-10 sm:mt-14 sm:space-y-12">
+                @if (Model?.NhaTaiTroGayQuys != null && Model.NhaTaiTroGayQuys.Any())
+                {
+                    var groupedSponsors = Model.NhaTaiTroGayQuys.OrderBy(n => n.ThuTu).GroupBy(n => n.NhomTaiTro);
+                    foreach (var group in groupedSponsors)
+                    {
+                        <div>
+                            <div class="mb-5 flex items-center gap-4">
+                                <h3 class="text-sm font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">@group.Key</h3>
+                                <div class="h-px flex-1 bg-gradient-to-r from-emerald-300 to-transparent dark:from-emerald-700"></div>
+                            </div>
+                            <div class="flex flex-wrap justify-center gap-5 sm:gap-6">
+                                @foreach (var sp in group)
+                                {
+                                    <button type="button"
+                                            title="@sp.TenDonVi"
+                                            onclick="openSponsorModal('@Html.Raw(sp.TenDonVi)', '@Html.Raw(sp.LinkLogo)', '@Html.Raw(sp.GioiThieu?.Replace("'", "\\'").Replace("\r\n", " "))', '@Html.Raw(sp.LinkWebsite)')"
+                                            class="group relative flex h-28 w-44 items-center justify-center rounded-2xl bg-white dark:bg-volunteer-card p-5 ring-1 ring-emerald-100 dark:ring-white/10 transition hover:-translate-y-1.5 sm:h-32 sm:w-56 sm:p-6 shadow-sm hover:shadow-md cursor-pointer">
+                                        <img alt="@sp.TenDonVi" src="@sp.LinkLogo" class="object-contain p-3 transition duration-300 group-hover:scale-105 w-full h-full" />
+                                        <span class="pointer-events-none absolute left-1/2 top-full z-10 mt-2 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-full bg-emerald-900 text-white dark:bg-white dark:text-slate-900 px-3 py-1 text-xs font-semibold opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100 shadow-md">
+                                            @sp.TenDonVi
+                                        </span>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- POPUP 1: MODAL HIỂN THỊ MÃ QR CHUYỂN KHOẢN -->
+<div id="qrModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white dark:bg-volunteer-card rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative animate-fade-in-up text-center border border-emerald-100 dark:border-white/10">
+        <button type="button" onclick="closeQrModal()" class="absolute top-4 right-4 h-9 w-9 rounded-full bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 flex items-center justify-center font-bold text-slate-600 dark:text-slate-300">✕</button>
+        <h3 id="qrModalTitle" class="text-xl font-black text-emerald-800 dark:text-emerald-300 mb-4">Thông tin Quyên góp</h3>
+        <div class="bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-200 dark:border-white/10 inline-block mb-4">
+            <img id="qrModalImg" src="" alt="QR Code" class="w-56 h-56 object-contain mx-auto rounded-lg" />
+        </div>
+        <div class="text-left space-y-2 bg-emerald-50/70 dark:bg-white/5 p-4 rounded-2xl border border-emerald-100 dark:border-white/10 text-sm text-slate-800 dark:text-slate-200">
+            <p><span class="text-slate-500 dark:text-slate-400">Ngân hàng:</span> <strong id="qrModalBank" class="text-slate-900 dark:text-white"></strong></p>
+            <p><span class="text-slate-500 dark:text-slate-400">Số tài khoản:</span> <strong id="qrModalAccNum" class="text-emerald-700 dark:text-emerald-400 text-base select-all"></strong></p>
+            <p><span class="text-slate-500 dark:text-slate-400">Chủ tài khoản:</span> <strong id="qrModalAccName" class="text-slate-900 dark:text-white"></strong></p>
+            <p><span class="text-slate-500 dark:text-slate-400">Nội dung CK:</span> <strong id="qrModalNote" class="text-amber-700 dark:text-amber-400 select-all"></strong></p>
+        </div>
+    </div>
+</div>
+
+<!-- POPUP 2: MODAL GIỚI THIỆU NHÀ TÀI TRỢ -->
+<div id="sponsorModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white dark:bg-volunteer-card rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative text-center border border-emerald-100 dark:border-white/10 animate-fade-in-up">
+        <button type="button" onclick="closeSponsorModal()" class="absolute top-4 right-4 h-9 w-9 rounded-full bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 flex items-center justify-center font-bold text-slate-600 dark:text-slate-300">✕</button>
+        <img id="spModalLogo" src="" class="h-24 object-contain mx-auto mb-4" />
+        <h3 id="spModalName" class="text-xl font-black text-slate-900 dark:text-white mb-3"></h3>
+        <p id="spModalIntro" class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-6"></p>
+        <a id="spModalLink" href="#" target="_blank" class="inline-flex items-center gap-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 text-sm transition shadow-md">
+            <span>Tìm hiểu thêm</span>
+            <i class="fas fa-arrow-right text-xs"></i>
+        </a>
+    </div>
+</div>
+
+<script>
+    function openQrModal(title, qrUrl, bank, accNum, accName, note) {
+        document.getElementById('qrModalTitle').innerText = title;
+        document.getElementById('qrModalImg').src = qrUrl || '/logo-mark.png';
+        document.getElementById('qrModalBank').innerText = bank;
+        document.getElementById('qrModalAccNum').innerText = accNum;
+        document.getElementById('qrModalAccName').innerText = accName;
+        document.getElementById('qrModalNote').innerText = note;
+        const modal = document.getElementById('qrModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+    function closeQrModal() {
+        const modal = document.getElementById('qrModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    function openSponsorModal(name, logo, intro, url) {
+        if (!intro && !url) return;
+        document.getElementById('spModalName').innerText = name;
+        document.getElementById('spModalLogo').src = logo;
+        document.getElementById('spModalIntro').innerText = intro || "Cảm ơn đơn vị đã đồng hành cùng chiến dịch!";
+        const linkBtn = document.getElementById('spModalLink');
+        if (url) {
+            linkBtn.href = url;
+            linkBtn.classList.remove('hidden');
+        } else {
+            linkBtn.classList.add('hidden');
+        }
+        const modal = document.getElementById('sponsorModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+    function closeSponsorModal() {
+        const modal = document.getElementById('sponsorModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+</script>

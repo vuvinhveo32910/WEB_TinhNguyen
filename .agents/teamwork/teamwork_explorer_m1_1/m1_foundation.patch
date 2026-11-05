@@ -1,0 +1,167 @@
+--- WEB_TinhNguyen/Program.cs
++++ WEB_TinhNguyen/Program.cs
+@@ -1,14 +1,29 @@
+ using WEB_TinhNguyen.Data;
+ using Microsoft.EntityFrameworkCore;
++using WEB_TinhNguyen.Areas.CuaHang.Helpers;
+ 
+ var builder = WebApplication.CreateBuilder(args);
+-// Dán đoạn này vào để kết nối DB
++
++// Kết nối cơ sở dữ liệu Entity Framework Core
+ builder.Services.AddDbContext<ApplicationDbContext>(options =>
+     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+ 
+-// Add services to the container.
+-builder.Services.AddControllersWithViews();
+-// Add services to the container.
++// Đăng ký In-Memory Cache cho Session
++builder.Services.AddDistributedMemoryCache();
++
++// Cấu hình Session quản lý giỏ hàng sản phẩm gây quỹ
++builder.Services.AddSession(options =>
++{
++    options.IdleTimeout = TimeSpan.FromMinutes(60);
++    options.Cookie.HttpOnly = true;
++    options.Cookie.IsEssential = true;
++    options.Cookie.Name = ".WEB_TinhNguyen.Session";
++});
++
++// Đăng ký HttpContextAccessor để truy cập session và context từ view/service
++builder.Services.AddHttpContextAccessor();
++
++// Đăng ký Controllers và Views
+ builder.Services.AddControllersWithViews();
+ 
+ var app = builder.Build();
+@@ -24,14 +39,35 @@
+ app.UseHttpsRedirection();
+ app.UseRouting();
+ 
++// Middleware Session: BẮT BUỘC đặt sau UseRouting() và trước UseAuthorization()
++app.UseSession();
++
+ app.UseAuthorization();
+ 
+ app.MapStaticAssets();
+ 
++// Route cho Area (Cửa hàng gây quỹ & Admin Cửa hàng): Đặt TRƯỚC route mặc định
++app.MapControllerRoute(
++    name: "areas",
++    pattern: "{area:exists}/{controller=CuaHang}/{action=Index}/{id?}")
++    .WithStaticAssets();
++
++// Route mặc định hệ thống
+ app.MapControllerRoute(
+     name: "default",
+     pattern: "{controller=Home}/{action=Index}/{id?}")
+     .WithStaticAssets();
+ 
++// Khởi tạo dữ liệu mẫu ban đầu (DbInitializer Seed Data) với cơ chế phòng vệ khi offline
++try
++{
++    using var scope = app.Services.CreateScope();
++    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
++    DbInitializer.Initialize(context);
++}
++catch (Exception ex)
++{
++    app.Logger.LogWarning(ex, "Database initialization warning: SQL Server có thể đang offline, hệ thống sẽ sử dụng dữ liệu mẫu in-memory dự phòng.");
++}
+ 
+ app.Run();
+--- WEB_TinhNguyen/Data/ApplicationDbContext.cs
++++ WEB_TinhNguyen/Data/ApplicationDbContext.cs
+@@ -1,5 +1,6 @@
+-﻿using Microsoft.EntityFrameworkCore;
++using Microsoft.EntityFrameworkCore;
+ using WEB_TinhNguyen.Models;
++using WEB_TinhNguyen.Areas.CuaHang.Models;
+ 
+ namespace WEB_TinhNguyen.Data
+ {
+@@ -29,6 +30,53 @@
+         public DbSet<CauHinhTinTuc> CauHinhTinTucs { get; set; }
+         public DbSet<BaiVietTinTuc> BaiVietTinTucs { get; set; }
+         public DbSet<ThuVienHieuUng> ThuVienHieuUngs { get; set; }
+-        // Bạn có thể thêm DbSet cho các bảng khác (TinTuc, NhaTaiTro...) ở đây sau
++
++        // =========================================================================
++        // PHÂN HỆ: CỬA HÀNG SẢN PHẨM GÂY QUỸ (AREA: CuaHang)
++        // =========================================================================
++        public DbSet<SanPhamGayQuy> SanPhamGayQuys { get; set; }
++        public DbSet<DonHangGayQuy> DonHangGayQuys { get; set; }
++        public DbSet<ChiTietDonHangGayQuy> ChiTietDonHangGayQuys { get; set; }
++
++        protected override void OnModelCreating(ModelBuilder modelBuilder)
++        {
++            base.OnModelCreating(modelBuilder);
++
++            // Cấu hình bảng và trường tiền tệ cho SanPhamGayQuy
++            modelBuilder.Entity<SanPhamGayQuy>(entity =>
++            {
++                entity.ToTable("SanPhamGayQuy");
++                entity.Property(e => e.GiaBan).HasColumnType("decimal(18,2)");
++                entity.Property(e => e.GiaGoc).HasColumnType("decimal(18,2)");
++            });
++
++            // Cấu hình bảng và trường tiền tệ cho DonHangGayQuy
++            modelBuilder.Entity<DonHangGayQuy>(entity =>
++            {
++                entity.ToTable("DonHangGayQuy");
++                entity.Property(e => e.TongTienHang).HasColumnType("decimal(18,2)");
++                entity.Property(e => e.TienUngHoThem).HasColumnType("decimal(18,2)");
++                entity.Property(e => e.PhiVanChuyen).HasColumnType("decimal(18,2)");
++                entity.Property(e => e.TongThanhToan).HasColumnType("decimal(18,2)");
++            });
++
++            // Cấu hình bảng, trường tiền tệ và khóa ngoại cho ChiTietDonHangGayQuy
++            modelBuilder.Entity<ChiTietDonHangGayQuy>(entity =>
++            {
++                entity.ToTable("ChiTietDonHangGayQuy");
++                entity.Property(e => e.DonGia).HasColumnType("decimal(18,2)");
++                entity.Property(e => e.ThanhTien).HasColumnType("decimal(18,2)");
++
++                entity.HasOne(d => d.DonHang)
++                      .WithMany(p => p.ChiTietDonHangs)
++                      .HasForeignKey(d => d.IDDonHang)
++                      .OnDelete(DeleteBehavior.Cascade);
++
++                entity.HasOne(d => d.SanPham)
++                      .WithMany()
++                      .HasForeignKey(d => d.IDSanPham)
++                      .OnDelete(DeleteBehavior.Restrict);
++            });
++        }
+     }
+ }
+--- tailwind.config.js
++++ tailwind.config.js
+@@ -2,6 +2,10 @@
+ module.exports = {
+   content: [
+     "./Views/**/*.cshtml",
++    "./Areas/**/*.cshtml",
++    "./WEB_TinhNguyen/Views/**/*.cshtml",
++    "./WEB_TinhNguyen/Areas/**/*.cshtml",
++    "./WEB_TinhNguyen/wwwroot/js/**/*.js",
+     "./wwwroot/js/**/*.js"
+   ],
+   theme: {
+@@ -25,14 +29,14 @@
+       },
+       boxShadow: {
+         'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+-      }, /* <--- LỖI NẰM Ở ĐÂY: Đã thêm dấu phẩy bị thiếu */
++      },
+       fontFamily: {
+         display: ['var(--font-heading)'],
+         sans: ['var(--font-body)'],
+       }
+     },
+   },
+- plugins: [
++  plugins: [
+     require('@tailwindcss/container-queries'),
+   ],
+ }

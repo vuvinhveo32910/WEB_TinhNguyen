@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build:css": "tailwindcss -i Styles/app.css -o wwwroot/css/site.css --minify",
-    "watch:css": "tailwindcss -i Styles/app.css -o wwwroot/css/site.css --watch"
+    "build:css": "tailwindcss -i Styles/app.css -o WEB_TinhNguyen/wwwroot/css/site.css --minify",
+    "watch:css": "tailwindcss -i Styles/app.css -o WEB_TinhNguyen/wwwroot/css/site.css --watch"
   },
   "keywords": [],
   "author": "",

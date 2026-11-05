@@ -1,0 +1,43 @@
+diff --git a/WEB_TinhNguyen/Views/Shared/_AdminLayout.cshtml b/WEB_TinhNguyen/Views/Shared/_AdminLayout.cshtml
+--- a/WEB_TinhNguyen/Views/Shared/_AdminLayout.cshtml
++++ b/WEB_TinhNguyen/Views/Shared/_AdminLayout.cshtml
+@@ -266,6 +266,11 @@
+                     </a>
+                 </li>
++                <li>
++                    <a href="/CuaHang/AdminSanPham" class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "AdminSanPham" ? "active" : "")">
++                        <i class="fas fa-boxes"></i> <span class="link-text">Sản phẩm Gây Quỹ</span>
++                    </a>
++                </li>
+                 <li>
+                     <a href="@Url.Action("Index", "AdminKyUc")" class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "AdminKyUc" ? "active" : "")">
+                         <i class="fas fa-images"></i> <span class="link-text">Cấu hình Ký ức</span>
+diff --git a/WEB_TinhNguyen/Views/Admin/Index.cshtml b/WEB_TinhNguyen/Views/Admin/Index.cshtml
+--- a/WEB_TinhNguyen/Views/Admin/Index.cshtml
++++ b/WEB_TinhNguyen/Views/Admin/Index.cshtml
+@@ -105,7 +105,7 @@
+     <!-- Lối tắt tính năng (Quick Links) -->
+     <h3 class="text-lg font-bold text-gray-800 pt-4 pb-2 border-b border-gray-200">Lựa chọn Chức năng Quản trị</h3>
+-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
++    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+ 
+         <a href="@Url.Action("Index", "AdminTrangChu")" class="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 hover:border-green-500 hover:shadow-lg transition-all group">
+             <div class="w-12 h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center group-hover:bg-green-600 group-hover:text-white transition-colors">
+@@ -115,6 +115,16 @@
+                 <p class="text-xs text-gray-500">Banner, Form đếm ngược...</p>
+             </div>
+         </a>
++
++        <!-- Lối tắt Quản lý Sản phẩm Gây Quỹ -->
++        <a href="/CuaHang/AdminSanPham" class="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 hover:border-emerald-500 hover:shadow-lg transition-all group">
++            <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
++                <i class="fas fa-boxes text-lg"></i>
++            </div>
++            <div>
++                <p class="font-bold text-gray-800 text-sm mb-0.5 group-hover:text-emerald-700 transition-colors">Sản phẩm Gây Quỹ</p>
++                <p class="text-xs text-gray-500">Quản lý kho, thêm/sửa sản phẩm...</p>
++            </div>
++        </a>
+ 
+         <a href="@Url.Action("Index", "AdminKyUc")" class="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 hover:border-blue-500 hover:shadow-lg transition-all group">
+             <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">

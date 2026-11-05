@@ -1,0 +1,149 @@
+@model WEB_TinhNguyen.MoHinh.CauHinhChuongTrinh
+
+@{
+    ViewData["Title"] = "Chương trình " + ViewBag.Nam;
+    var conf = Model ?? new CauHinhChuongTrinh();
+}
+
+<style>
+    .dynamic-font {
+        font-family: '@(conf.FontTieuDe ?? "Be Vietnam Pro")', sans-serif !important;
+    }
+</style>
+
+<main class="w-full">
+    <!-- HERO SECTION HIỆN ĐẠI & TRUYỀN CẢM HỨNG -->
+    <section class="relative overflow-hidden pt-28 pb-16 sm:pt-36 lg:pt-40 lg:pb-24 min-h-[calc(100vh-5rem)] xl:min-h-0 flex items-center bg-gradient-to-b from-volunteer-50/70 via-white to-emerald-50/30 dark:from-volunteer-night dark:via-volunteer-card dark:to-volunteer-night transition-colors duration-300">
+        <div class="relative z-10 mx-auto max-w-7xl px-6">
+            <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+                <div class="flex flex-col items-start text-left animate-fade-in-up">
+                    <div class="inline-flex items-center gap-2 rounded-full px-4 py-2 bg-emerald-100/80 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 backdrop-blur-md shadow-xs border border-emerald-200 dark:border-emerald-800/50">
+                        <span class="h-2 w-2 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse"></span>
+                        <span class="text-xs font-bold uppercase tracking-wider">Hành trình tình nguyện @ViewBag.Nam</span>
+                    </div>
+
+                    <div class="mt-6">
+                        <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl dynamic-font text-volunteer-text dark:text-white leading-tight">
+                            @conf.TieuDeChinh <br class="hidden md:block">
+                            <span class="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-700 bg-clip-text text-transparent dark:from-emerald-400 dark:to-green-300">
+                                @conf.TieuDeNhanManh
+                            </span>
+                        </h1>
+                    </div>
+
+                    <div class="mt-6">
+                        <p class="max-w-xl text-lg leading-relaxed text-volunteer-text/80 dark:text-slate-300 font-medium">
+                            @conf.DoanVanMoTa
+                        </p>
+                    </div>
+
+                    <div class="mt-8 flex flex-wrap gap-4">
+                        <a href="#programs" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                            <span>Khám phá các chặng</span>
+                            <i class="fas fa-arrow-down text-xs"></i>
+                        </a>
+                        <a href="/Home/GayQuy" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white dark:bg-white/10 hover:bg-emerald-50 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-300 dark:border-white/20 shadow-xs transition-all">
+                            <i class="fas fa-heart text-rose-500 animate-pulse"></i>
+                            <span>Đồng hành gây quỹ</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- KHỐI ẢNH HERO NGHỆ THUẬT -->
+                <div class="relative block h-[320px] sm:h-[420px] lg:h-[480px] w-full mt-6 lg:mt-0">
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[80%] w-[80%] rounded-full bg-emerald-400/20 blur-3xl -z-10"></div>
+
+                    <div class="absolute top-0 right-0 h-[70%] w-[65%] rounded-3xl overflow-hidden shadow-2xl z-20 hover:z-30 border-4 border-white dark:border-slate-800 transform translate-x-3 -translate-y-2 transition duration-500 hover:scale-105">
+                        <img src="@(conf.LinkAnhHero1 ?? "/gallery/team.jpg")" alt="Ảnh chiến dịch 1" class="object-cover h-full w-full" />
+                    </div>
+
+                    <div class="absolute bottom-0 left-0 h-[65%] w-[70%] rounded-3xl overflow-hidden shadow-2xl z-10 hover:z-30 border-4 border-white dark:border-slate-800 transition duration-500 hover:scale-105">
+                        <img src="@(conf.LinkAnhHero2 ?? "/gallery/team.jpg")" alt="Ảnh chiến dịch 2" class="object-cover h-full w-full" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CÁC CHẶNG CHƯƠNG TRÌNH VỚI CARD HIỆN ĐẠI -->
+    <section id="programs" class="py-20 sm:py-28 relative bg-white dark:bg-volunteer-night border-y border-emerald-100 dark:border-white/10 transition-colors duration-300">
+        <div class="mx-auto max-w-7xl px-6">
+            <div class="text-center mb-16 sm:mb-24">
+                <span class="mb-4 inline-block rounded-full px-5 py-2 text-xs font-black uppercase tracking-widest bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                    Trọng tâm @ViewBag.Nam
+                </span>
+                <h2 class="text-3xl font-black sm:text-4xl lg:text-5xl text-volunteer-text dark:text-white mt-2">
+                    LỘ TRÌNH TRIỂN KHAI CHIẾN DỊCH
+                </h2>
+                <div class="w-20 h-1.5 mx-auto rounded-full mt-5 bg-gradient-to-r from-emerald-500 to-green-600"></div>
+            </div>
+
+            <div class="space-y-24 lg:space-y-32">
+                @if (conf.ChangChuongTrinhs != null && conf.ChangChuongTrinhs.Any())
+                {
+                    var sortedChangs = conf.ChangChuongTrinhs.OrderBy(x => x.ThuTu).ToList();
+                    for (int i = 0; i < sortedChangs.Count; i++)
+                    {
+                        var chang = sortedChangs[i];
+                        bool isReverse = i % 2 != 0;
+
+                        <div class="flex flex-col lg:flex-row gap-12 items-center">
+                            <!-- Cột Nội Dung -->
+                            <div class="w-full lg:w-1/2 @(isReverse ? "order-2 lg:order-2 lg:pl-8" : "order-2 lg:order-1")">
+                                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full font-bold text-xs mb-4 shadow-xs bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                    <i class="far fa-clock"></i>
+                                    <span>@chang.NhanThoiGian</span>
+                                </div>
+                                <h3 class="text-2xl sm:text-3xl lg:text-4xl leading-tight font-black mb-4 text-volunteer-text dark:text-white">@chang.TieuDeChang</h3>
+                                <p class="text-base sm:text-lg leading-relaxed mb-6 text-volunteer-text/80 dark:text-slate-300">@chang.MoTaChang</p>
+
+                                <div class="flex items-start gap-3 text-sm mb-6 bg-emerald-50/60 dark:bg-volunteer-card p-4 rounded-2xl border border-emerald-200/70 dark:border-emerald-800/40 text-volunteer-text dark:text-emerald-200 shadow-xs">
+                                    <i class="fas fa-map-marker-alt text-emerald-600 dark:text-emerald-400 mt-1 text-base"></i>
+                                    <span class="font-medium">@chang.DiaDiem</span>
+                                </div>
+
+                                <!-- Box Lộ trình Sinh Tự Động -->
+                                <div class="bg-white dark:bg-volunteer-card p-6 rounded-3xl border border-emerald-100 dark:border-white/10 shadow-lg backdrop-blur-sm">
+                                    <h4 class="font-bold text-lg mb-4 text-volunteer-text dark:text-white flex items-center gap-2">
+                                        <i class="fas fa-tasks text-emerald-600"></i>
+                                        <span>Các hoạt động chi tiết</span>
+                                    </h4>
+                                    <div class="flex flex-col space-y-4">
+                                        @if (chang.ChiTietLoTrinhs != null && chang.ChiTietLoTrinhs.Any())
+                                        {
+                                            var loTrinhs = chang.ChiTietLoTrinhs.OrderBy(l => l.ThuTu).ToList();
+                                            for (int j = 0; j < loTrinhs.Count; j++)
+                                            {
+                                                bool isLast = (j == loTrinhs.Count - 1);
+                                                <div class="flex gap-4 items-start group">
+                                                    <div class="flex flex-col items-center">
+                                                        <div class="w-3.5 h-3.5 rounded-full mt-1 bg-emerald-600 shadow-xs ring-4 ring-emerald-100 dark:ring-emerald-950"></div>
+                                                        @if (!isLast)
+                                                        {
+                                                            <div class="w-0.5 h-8 my-1 bg-emerald-200 dark:bg-emerald-900"></div>
+                                                        }
+                                                    </div>
+                                                    <div>
+                                                        <h5 class="font-bold text-sm text-emerald-800 dark:text-emerald-300">@loTrinhs[j].ThoiGian</h5>
+                                                        <p class="text-xs sm:text-sm mt-0.5 text-volunteer-text/75 dark:text-slate-300">@loTrinhs[j].NoiDungHoatDong</p>
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cột Ảnh -->
+                            <div class="w-full lg:w-1/2 @(isReverse ? "order-1 lg:order-1" : "order-1 lg:order-2")">
+                                <div class="rounded-3xl overflow-hidden shadow-2xl relative aspect-[4/3] border-4 border-white dark:border-slate-800 transition duration-500 hover:scale-[1.02]">
+                                    <img src="@(chang.LinkAnh ?? "/gallery/team.jpg")" alt="@chang.TieuDeChang" class="absolute inset-0 object-cover w-full h-full" />
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </section>
+</main>

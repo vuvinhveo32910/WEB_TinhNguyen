@@ -1,0 +1,16 @@
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var viewPath = ViewContext.View?.Path ?? "";
+
+    // Phân luồng Layout tự động: Các controller hoặc view Admin sử dụng _AdminLayout
+    // Các controller hoặc view Storefront (Cửa hàng, Giỏ hàng) sử dụng _CuaHangLayout riêng biệt 100% (thay thế _Layout)
+    if (controller.StartsWith("Admin", StringComparison.OrdinalIgnoreCase) ||
+        viewPath.Contains("/Admin", StringComparison.OrdinalIgnoreCase))
+    {
+        Layout = "~/GiaoDien/Shared/_AdminLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Areas/CuaHang/Views/Shared/_CuaHangLayout.cshtml"; // Dedicated storefront _Layout
+    }
+}

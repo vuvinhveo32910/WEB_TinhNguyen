@@ -1,0 +1,170 @@
+@{
+    ViewData["Title"] = "Tổng quan Dashboard";
+    Layout = "~/GiaoDien/Shared/_AdminLayout.cshtml";
+
+    // Lấy ngày hiện tại
+    var today = DateTime.Now.ToString("dd/MM/yyyy");
+    var dayOfWeek = DateTime.Now.ToString("dddd", new System.Globalization.CultureInfo("vi-VN"));
+}
+
+<div class="max-w-7xl mx-auto space-y-6">
+    <!-- Banner Chào mừng (Màu Xanh Tình Nguyện) -->
+    <div class="bg-gradient-to-r from-[#1b5e20] to-[#4caf50] rounded-2xl p-8 text-white shadow-lg relative overflow-hidden flex justify-between items-center">
+        <!-- Hiệu ứng trang trí -->
+        <div class="absolute -right-10 -top-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute right-20 -bottom-20 w-40 h-40 bg-yellow-400/20 rounded-full blur-xl pointer-events-none"></div>
+
+        <div class="relative z-10">
+            <h2 class="text-3xl font-bold mb-2 flex items-center gap-2">
+                Xin chào, Admin Hệ thống! 👋
+            </h2>
+            <p class="text-green-50 mb-5 font-medium">Chào mừng đến với Trung tâm Quản trị Cổng thông tin Dự án Trăng Sáng Langbiang.</p>
+            <div class="inline-flex items-center gap-2 bg-black/20 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="far fa-calendar-alt text-yellow-400"></i> @dayOfWeek, @today
+            </div>
+        </div>
+
+        <!-- Thống kê nhanh trên banner -->
+        <div class="relative z-10 hidden md:flex gap-4">
+            <div class="bg-black/20 backdrop-blur-md border border-white/10 rounded-xl p-4 text-center min-w-[120px]">
+                <div class="text-3xl font-bold text-yellow-400 mb-1">12</div>
+                <div class="text-xs font-bold uppercase tracking-wider text-green-50">Yêu cầu mới</div>
+            </div>
+            <div class="bg-black/20 backdrop-blur-md border border-white/10 rounded-xl p-4 text-center min-w-[120px]">
+                <div class="text-3xl font-bold text-white mb-1">45</div>
+                <div class="text-xs font-bold uppercase tracking-wider text-green-50">Bài viết</div>
+            </div>
+            <div class="bg-black/20 backdrop-blur-md border border-white/10 rounded-xl p-4 text-center min-w-[120px]">
+                <div class="text-3xl font-bold text-white mb-1">2</div>
+                <div class="text-xs font-bold uppercase tracking-wider text-green-50">Mùa dự án</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Các thẻ thống kê (Stats Cards) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Card 1 -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center justify-between hover:shadow-md transition">
+            <div>
+                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">TỔNG QUỸ ĐÓNG GÓP</p>
+                <h3 class="text-2xl font-extrabold text-gray-800">125.500K</h3>
+                <p class="text-xs text-green-600 font-semibold mt-2 flex items-center gap-1">
+                    <i class="fas fa-arrow-up"></i> Tăng so với mùa trước
+                </p>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center text-xl">
+                <i class="fas fa-donate"></i>
+            </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center justify-between hover:shadow-md transition">
+            <div>
+                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">TÌNH NGUYỆN VIÊN</p>
+                <h3 class="text-2xl font-extrabold text-gray-800">150</h3>
+                <p class="text-xs text-blue-600 font-semibold mt-2 flex items-center gap-1">
+                    <i class="fas fa-users"></i> Đã đăng ký tham gia
+                </p>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center text-xl">
+                <i class="fas fa-user-friends"></i>
+            </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center justify-between hover:shadow-md transition">
+            <div>
+                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">LỜI CHÚC ĐÃ NHẬN</p>
+                <h3 class="text-2xl font-extrabold text-gray-800">342</h3>
+                <p class="text-xs text-pink-600 font-semibold mt-2 flex items-center gap-1">
+                    <i class="fas fa-heart"></i> Lời yêu thương gửi đến
+                </p>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-pink-50 text-pink-500 flex items-center justify-center text-xl">
+                <i class="fas fa-envelope-open-text"></i>
+            </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center justify-between hover:shadow-md transition">
+            <div>
+                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">HÌNH ẢNH KHOẢNH KHẮC</p>
+                <h3 class="text-2xl font-extrabold text-gray-800">1,248</h3>
+                <p class="text-xs text-purple-600 font-semibold mt-2 flex items-center gap-1">
+                    <i class="fas fa-camera"></i> Đã lưu trữ trong Ký ức
+                </p>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center text-xl">
+                <i class="fas fa-images"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lối tắt tính năng (Quick Links) -->
+    <h3 class="text-lg font-bold text-gray-800 pt-4 pb-2 border-b border-gray-200">Lựa chọn Chức năng Quản trị</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+
+        <a href="@Url.Action("Index", "AdminTrangChu")" class="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 hover:border-green-500 hover:shadow-lg transition-all group">
+            <div class="w-12 h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center group-hover:bg-green-600 group-hover:text-white transition-colors">
+                <i class="fas fa-home text-lg"></i>
+            </div>
+            <div>
+                <p class="font-bold text-gray-800 text-sm mb-0.5 group-hover:text-green-700 transition-colors">Giao diện Trang chủ</p>
+                <p class="text-xs text-gray-500">Banner, Form đếm ngược...</p>
+            </div>
+        </a>
+
+        <!-- Lối tắt Quản lý Sản phẩm Gây Quỹ -->
+        <a href="/CuaHang/AdminSanPham" class="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 hover:border-emerald-500 hover:shadow-lg transition-all group">
+            <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                <i class="fas fa-boxes text-lg"></i>
+            </div>
+            <div>
+                <p class="font-bold text-gray-800 text-sm mb-0.5 group-hover:text-emerald-700 transition-colors">Sản phẩm Gây Quỹ</p>
+                <p class="text-xs text-gray-500">Quản lý kho, thêm/sửa...</p>
+            </div>
+        </a>
+
+        <!-- Lối tắt Quản lý Đơn hàng Gây Quỹ -->
+        <a href="/CuaHang/AdminDonHang" class="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 hover:border-emerald-500 hover:shadow-lg transition-all group">
+            <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                <i class="fas fa-receipt text-lg"></i>
+            </div>
+            <div>
+                <p class="font-bold text-gray-800 text-sm mb-0.5 group-hover:text-emerald-700 transition-colors">Đơn hàng Gây Quỹ</p>
+                <p class="text-xs text-gray-500">Tra cứu, duyệt đơn, VietQR...</p>
+            </div>
+        </a>
+
+        <a href="@Url.Action("Index", "AdminKyUc")" class="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 hover:border-blue-500 hover:shadow-lg transition-all group">
+            <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                <i class="fas fa-history text-lg"></i>
+            </div>
+            <div>
+                <p class="font-bold text-gray-800 text-sm mb-0.5 group-hover:text-blue-700 transition-colors">Quản lý Ký ức</p>
+                <p class="text-xs text-gray-500">Thêm năm dự án, Gallery...</p>
+            </div>
+        </a>
+
+        <a href="#" class="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 hover:border-orange-500 hover:shadow-lg transition-all group">
+            <div class="w-12 h-12 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                <i class="fas fa-newspaper text-lg"></i>
+            </div>
+            <div>
+                <p class="font-bold text-gray-800 text-sm mb-0.5 group-hover:text-orange-700 transition-colors">Quản lý Tin tức</p>
+                <p class="text-xs text-gray-500">Đăng bài viết mới</p>
+            </div>
+        </a>
+
+        <a href="#" class="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 hover:border-pink-500 hover:shadow-lg transition-all group">
+            <div class="w-12 h-12 rounded-full bg-pink-50 text-pink-600 flex items-center justify-center group-hover:bg-pink-600 group-hover:text-white transition-colors">
+                <i class="fas fa-heart text-lg"></i>
+            </div>
+            <div>
+                <p class="font-bold text-gray-800 text-sm mb-0.5 group-hover:text-pink-700 transition-colors">Duyệt Lời chúc</p>
+                <p class="text-xs text-gray-500">Ẩn/hiện lời chúc TNV</p>
+            </div>
+        </a>
+
+    </div>
+</div>

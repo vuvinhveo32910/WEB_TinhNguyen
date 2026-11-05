@@ -1,0 +1,438 @@
+@model WEB_TinhNguyen.Areas.CuaHang.Models.DonHangGayQuy
+@{
+    ViewData["Title"] = $"Chi tiết Đơn hàng #{Model.MaDonHang} - Quản trị Gây Quỹ";
+    Layout = "~/GiaoDien/Shared/_AdminLayout.cshtml";
+
+    var isBankTransfer = Model.PhuongThucThanhToan != "COD";
+    var cleanAmount = (long)Model.TongThanhToan;
+    var cleanMemo = Uri.EscapeDataString(Model.MaDonHang);
+    var qrUrl = $"https://img.vietqr.io/image/MB-0924044283-compact2.png?amount={cleanAmount}&addInfo={cleanMemo}&accountName=NGUYEN%20THAI%20VINH";
+
+    var totalItemsCharity = Model.ChiTietDonHangs?.Sum(c => c.TienDongGop) ?? 0m;
+    var totalDonation = Model.TienUngHoThem + totalItemsCharity;
+    var merchandiseTotal = Model.TongTienHang;
+}
+
+<div class="max-w-7xl mx-auto my-6 px-4 sm:px-6 lg:px-8 space-y-6">
+
+    <!-- BREADCRUMB & HEADER -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <nav class="flex items-center gap-2 text-xs text-gray-500 mb-2 font-medium">
+                <a href="@Url.Action("Index", "Admin", new { area = "" })" class="hover:text-emerald-600 transition flex items-center gap-1">
+                    <i class="fas fa-home"></i> Quản trị
+                </a>
+                <span>/</span>
+                <a href="/CuaHang/AdminDonHang" class="hover:text-emerald-600 transition">
+                    Đơn hàng Gây Quỹ
+                </a>
+                <span>/</span>
+                <span class="text-emerald-700 font-semibold font-mono">#@Model.MaDonHang</span>
+            </nav>
+            <div class="flex items-center gap-3 flex-wrap">
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
+                    <span>Đơn hàng</span>
+                    <span class="font-mono text-emerald-700">#@Model.MaDonHang</span>
+                </h1>
+
+                <!-- Order Status Badge -->
+                @switch (Model.TrangThaiDonHang)
+                {
+                    case "MoiDat":
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1">
+                            <i class="fas fa-clock"></i> Mới đặt
+                        </span>
+                        break;
+                    case "DaXacNhan":
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200 flex items-center gap-1">
+                            <i class="fas fa-check-circle"></i> Đã xác nhận
+                        </span>
+                        break;
+                    case "DangGiao":
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200 flex items-center gap-1">
+                            <i class="fas fa-shipping-fast"></i> Đang giao hàng
+                        </span>
+                        break;
+                    case "HoanThanh":
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                            <i class="fas fa-check-double"></i> Hoàn thành
+                        </span>
+                        break;
+                    case "DaHuy":
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200 flex items-center gap-1">
+                            <i class="fas fa-times-circle"></i> Đã hủy
+                        </span>
+                        break;
+                    default:
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800 border border-gray-200">
+                            @Model.TrangThaiDonHang
+                        </span>
+                        break;
+                }
+
+                <!-- Payment Status Badge -->
+                @if (Model.TrangThaiThanhToan == "DaThanhToan")
+                {
+                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                        <i class="fas fa-check"></i> Đã thanh toán
+                    </span>
+                }
+                else
+                {
+                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 flex items-center gap-1">
+                        <i class="fas fa-hourglass-half"></i> Chưa thanh toán
+                    </span>
+                }
+            </div>
+            <p class="mt-1 text-xs text-gray-500">
+                Thời gian đặt hàng: <strong>@Model.NgayDatHang.ToString("dd/MM/yyyy HH:mm:ss")</strong>
+                @if (Model.NgayCapNhat.HasValue)
+                {
+                    <span> • Cập nhật lần cuối: <strong>@Model.NgayCapNhat.Value.ToString("dd/MM/yyyy HH:mm:ss")</strong></span>
+                }
+            </p>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="flex items-center gap-3 flex-wrap">
+            <button type="button" onclick="window.print()"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 shadow-sm transition">
+                <i class="fas fa-print"></i>
+                <span>In phiếu đơn hàng</span>
+            </button>
+            <a href="/CuaHang/AdminDonHang"
+               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 shadow-sm transition">
+                <i class="fas fa-arrow-left"></i>
+                <span>Danh sách đơn hàng</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- FLASH ALERTS -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="flex items-center justify-between p-4 text-sm text-emerald-800 border border-emerald-200 rounded-2xl bg-emerald-50 shadow-sm transition">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-check-circle text-emerald-600 text-lg"></i>
+                <span class="font-bold">@TempData["SuccessMessage"]</span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-600 hover:text-emerald-800 text-sm font-bold p-1">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="flex items-center justify-between p-4 text-sm text-red-800 border border-red-200 rounded-2xl bg-red-50 shadow-sm transition">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-exclamation-triangle text-red-600 text-lg"></i>
+                <span class="font-bold">@TempData["ErrorMessage"]</span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-red-600 hover:text-red-800 text-sm font-bold p-1">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    }
+
+    <!-- 2-COLUMN DETAIL LAYOUT -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- CỘT TRÁI (8 COLS): THÔNG TIN NGƯỜI NHẬN & DANH SÁCH MÓN HÀNG -->
+        <div class="lg:col-span-8 space-y-6">
+
+            <!-- THÔNG TIN NGƯỜI MUA & GIAO HÀNG -->
+            <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                    <h2 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-user-circle text-emerald-600 text-lg"></i>
+                        <span>Thông tin Người ủng hộ &amp; Giao hàng</span>
+                    </h2>
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700">
+                        @Model.PhuongThucThanhToan
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <span class="text-xs text-gray-400 font-semibold block uppercase">Họ và tên</span>
+                        <div class="font-bold text-gray-900 text-base mt-0.5">@Model.HoTenNguoiMua</div>
+                    </div>
+                    <div>
+                        <span class="text-xs text-gray-400 font-semibold block uppercase">Số điện thoại</span>
+                        <div class="font-bold text-gray-900 text-base mt-0.5 flex items-center gap-2">
+                            <span>@Model.SoDienThoai</span>
+                            <a href="tel:@Model.SoDienThoai" class="text-emerald-600 hover:text-emerald-800 text-xs">
+                                <i class="fas fa-phone-alt"></i> Gọi
+                            </a>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-xs text-gray-400 font-semibold block uppercase">Email liên hệ</span>
+                        <div class="font-medium text-gray-900 mt-0.5">
+                            @(string.IsNullOrEmpty(Model.Email) ? "Không cung cấp" : Model.Email)
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-xs text-gray-400 font-semibold block uppercase">Phương thức thanh toán</span>
+                        <div class="font-medium text-gray-900 mt-0.5">
+                            @(Model.PhuongThucThanhToan == "COD" ? "Thanh toán khi nhận hàng (COD)" : "Chuyển khoản VietQR")
+                        </div>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <span class="text-xs text-gray-400 font-semibold block uppercase">Địa chỉ nhận quà</span>
+                        <div class="font-medium text-gray-900 mt-0.5 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            @Model.DiaChiNhanHang
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.GhiChu))
+                    {
+                        <div class="sm:col-span-2">
+                            <span class="text-xs text-gray-400 font-semibold block uppercase">Lời nhắn / Ghi chú từ người ủng hộ</span>
+                            <div class="italic text-gray-700 mt-0.5 bg-amber-50/60 p-3 rounded-xl border border-amber-200/60 text-sm">
+                                "@Model.GhiChu"
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- BẢNG CHI TIẾT SẢN PHẨM -->
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+                    <h2 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-box-open text-emerald-600 text-lg"></i>
+                        <span>Chi tiết sản phẩm gây quỹ (@(Model.ChiTietDonHangs?.Count ?? 0) mặt hàng)</span>
+                    </h2>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
+                        <thead class="bg-gray-50 text-gray-500 uppercase text-[11px] font-bold tracking-wider">
+                            <tr>
+                                <th scope="col" class="py-3 px-4">Sản phẩm</th>
+                                <th scope="col" class="py-3 px-4 text-center">Đơn giá</th>
+                                <th scope="col" class="py-3 px-4 text-center">SL</th>
+                                <th scope="col" class="py-3 px-4 text-right">Thành tiền</th>
+                                <th scope="col" class="py-3 px-4 text-right">% Quỹ</th>
+                                <th scope="col" class="py-3 px-4 text-right">Trích quỹ</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @if (Model.ChiTietDonHangs != null && Model.ChiTietDonHangs.Any())
+                            {
+                                foreach (var item in Model.ChiTietDonHangs)
+                                {
+                                    <tr class="hover:bg-gray-50/60 transition">
+                                        <td class="py-3.5 px-4">
+                                            <div class="flex items-center gap-3">
+                                                <img src="@(string.IsNullOrEmpty(item.LinkHinhAnh) ? (item.SanPham?.LinkHinhAnh ?? "/assets/journey.jpg") : item.LinkHinhAnh)"
+                                                     alt="@item.TenSanPham"
+                                                     class="w-12 h-12 rounded-xl object-cover border border-gray-200 shrink-0" />
+                                                <div>
+                                                    <div class="font-bold text-gray-900">@item.TenSanPham</div>
+                                                    <div class="text-xs text-gray-400">Mã SP: #@item.IDSanPham</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-3.5 px-4 text-center font-semibold text-gray-700 whitespace-nowrap">
+                                            @item.DonGia.ToString("N0")₫
+                                        </td>
+                                        <td class="py-3.5 px-4 text-center font-bold text-gray-900">
+                                            @item.SoLuong
+                                        </td>
+                                        <td class="py-3.5 px-4 text-right font-black text-gray-900 whitespace-nowrap">
+                                            @item.ThanhTien.ToString("N0")₫
+                                        </td>
+                                        <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                                            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+                                                @item.PhanTramDongGop%
+                                            </span>
+                                        </td>
+                                        <td class="py-3.5 px-4 text-right font-bold text-rose-600 whitespace-nowrap">
+                                            +@item.TienDongGop.ToString("N0")₫
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- TỔNG KẾT TÀI CHÍNH -->
+                <div class="p-6 bg-gray-50/70 border-t border-gray-100 space-y-2 text-sm">
+                    <div class="flex justify-between text-gray-600">
+                        <span>Tiền hàng:</span>
+                        <span class="font-bold text-gray-900">@merchandiseTotal.ToString("N0") VNĐ</span>
+                    </div>
+
+                    @if (Model.TienUngHoThem > 0)
+                    {
+                        <div class="flex justify-between text-amber-700">
+                            <span>Tiền ủng hộ thêm tùy tâm:</span>
+                            <span class="font-bold">+@Model.TienUngHoThem.ToString("N0") VNĐ</span>
+                        </div>
+                    }
+
+                    <div class="flex justify-between text-gray-600">
+                        <span>Phí giao hàng:</span>
+                        <span class="font-bold text-emerald-600">0 VNĐ (Tài trợ thiện nguyện)</span>
+                    </div>
+
+                    <div class="pt-3 border-t border-gray-200 flex justify-between items-baseline">
+                        <span class="text-base font-extrabold text-gray-900">Tổng thanh toán:</span>
+                        <span class="text-2xl font-black text-emerald-700">@Model.TongThanhToan.ToString("N0") VNĐ</span>
+                    </div>
+
+                    <!-- Charity Pill Highlight -->
+                    <div class="mt-4 p-3.5 rounded-xl bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200 flex items-center justify-between flex-wrap gap-2">
+                        <div class="flex items-center gap-2 text-rose-800 font-bold text-sm">
+                            <i class="fas fa-heart text-rose-500 text-lg"></i>
+                            <span>Tổng tiền trích vào Quỹ Tình Nguyện:</span>
+                        </div>
+                        <div class="text-lg font-black text-rose-600">
+                            @totalDonation.ToString("N0") VNĐ
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- CỘT PHẢI (4 COLS): QUẢN TRỊ TRẠNG THÁI & VIETQR -->
+        <div class="lg:col-span-4 space-y-6">
+
+            <!-- BOX CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG -->
+            <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                    <h2 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-tasks text-emerald-600"></i>
+                        <span>Cập nhật tiến độ đơn</span>
+                    </h2>
+                </div>
+
+                <form asp-area="CuaHang" asp-controller="AdminDonHang" asp-action="CapNhatTrangThai" method="post" class="space-y-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.IDDonHang" />
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">
+                            Trạng thái đơn hàng
+                        </label>
+                        <select name="trangThaiDonHang" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:ring-2 focus:ring-emerald-500">
+                            <option value="MoiDat" selected="@(Model.TrangThaiDonHang == "MoiDat")">⏳ Mới đặt (Chờ duyệt)</option>
+                            <option value="DaXacNhan" selected="@(Model.TrangThaiDonHang == "DaXacNhan")">✔️ Đã xác nhận</option>
+                            <option value="DangGiao" selected="@(Model.TrangThaiDonHang == "DangGiao")">🚚 Đang giao hàng</option>
+                            <option value="HoanThanh" selected="@(Model.TrangThaiDonHang == "HoanThanh")">🎉 Hoàn thành đơn</option>
+                            <option value="DaHuy" selected="@(Model.TrangThaiDonHang == "DaHuy")">❌ Đã hủy (Hoàn trả tồn kho)</option>
+                        </select>
+                        <p class="text-[11px] text-gray-400 mt-1">
+                            Lưu ý: Hủy đơn sẽ tự động hoàn trả số lượng sản phẩm vào kho gây quỹ.
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">
+                            Trạng thái thanh toán
+                        </label>
+                        <select name="trangThaiThanhToan" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:ring-2 focus:ring-emerald-500">
+                            <option value="ChuaThanhToan" selected="@(Model.TrangThaiThanhToan == "ChuaThanhToan")">Chưa thanh toán</option>
+                            <option value="DaThanhToan" selected="@(Model.TrangThaiThanhToan == "DaThanhToan")">Đã thanh toán</option>
+                        </select>
+                    </div>
+
+                    <button type="submit"
+                            class="w-full py-3 px-4 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 shadow-sm transition flex items-center justify-center gap-2">
+                        <i class="fas fa-save"></i>
+                        <span>Cập nhật trạng thái</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- BOX VIETQR / THANH TOÁN -->
+            @if (isBankTransfer)
+            {
+                <div class="bg-white rounded-2xl p-6 border border-emerald-200 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                        <h2 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-qrcode text-emerald-600"></i>
+                            <span>Thông tin VietQR Chuyển khoản</span>
+                        </h2>
+                    </div>
+
+                    <!-- QR Image -->
+                    <div class="flex justify-center">
+                        <div class="p-2 bg-white rounded-2xl border border-emerald-300 shadow-md max-w-[200px]">
+                            <img src="@qrUrl" alt="Mã VietQR đơn hàng @Model.MaDonHang" class="w-full h-auto rounded-xl" />
+                        </div>
+                    </div>
+
+                    <!-- Transfer Details Table -->
+                    <div class="bg-gray-50 rounded-xl p-3 space-y-2 text-xs">
+                        <div class="flex justify-between items-center py-1 border-b border-gray-200">
+                            <span class="text-gray-500">Ngân hàng:</span>
+                            <span class="font-bold text-gray-900">Quân Đội (MBBank)</span>
+                        </div>
+                        <div class="flex justify-between items-center py-1 border-b border-gray-200">
+                            <span class="text-gray-500">Số tài khoản:</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-mono font-extrabold text-emerald-700 text-sm">0924044283</span>
+                                <button type="button" onclick="navigator.clipboard.writeText('0924044283'); if(window.Swal) Swal.fire({toast:true, position:'top-end', icon:'success', title:'Đã sao chép STK', showConfirmButton:false, timer:1500});"
+                                        class="text-gray-400 hover:text-gray-600 p-0.5" title="Sao chép STK">
+                                    <i class="far fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center py-1 border-b border-gray-200">
+                            <span class="text-gray-500">Chủ tài khoản:</span>
+                            <span class="font-bold text-gray-900 uppercase">NGUYEN THAI VINH</span>
+                        </div>
+                        <div class="flex justify-between items-center py-1 border-b border-gray-200">
+                            <span class="text-gray-500">Số tiền:</span>
+                            <span class="font-bold text-emerald-700 text-sm">@Model.TongThanhToan.ToString("N0")₫</span>
+                        </div>
+                        <div class="flex justify-between items-center py-1">
+                            <span class="text-gray-500">Nội dung CK:</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-mono font-bold text-amber-700">@Model.MaDonHang</span>
+                                <button type="button" onclick="navigator.clipboard.writeText('@Model.MaDonHang'); if(window.Swal) Swal.fire({toast:true, position:'top-end', icon:'success', title:'Đã sao chép mã đơn', showConfirmButton:false, timer:1500});"
+                                        class="text-gray-400 hover:text-gray-600 p-0.5" title="Sao chép nội dung">
+                                    <i class="far fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (Model.TrangThaiThanhToan != "DaThanhToan")
+                    {
+                        <form asp-area="CuaHang" asp-controller="AdminDonHang" asp-action="CapNhatTrangThai" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.IDDonHang" />
+                            <input type="hidden" name="trangThaiDonHang" value="DaXacNhan" />
+                            <input type="hidden" name="trangThaiThanhToan" value="DaThanhToan" />
+                            <button type="submit"
+                                    class="w-full py-2.5 px-4 rounded-xl font-bold text-xs text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition flex items-center justify-center gap-1.5">
+                                <i class="fas fa-check-double"></i>
+                                <span>Xác nhận đã nhận tiền chuyển khoản</span>
+                            </button>
+                        </form>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm space-y-2 text-center">
+                    <div class="w-12 h-12 mx-auto rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xl">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-900 text-sm">Thanh toán khi nhận hàng (COD)</h3>
+                    <p class="text-xs text-gray-500">
+                        Đơn hàng thu tiền mặt trực tiếp khi giao ấn phẩm quà tặng lưu niệm đến địa chỉ người nhận.
+                    </p>
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
